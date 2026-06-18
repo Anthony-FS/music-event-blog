@@ -1,7 +1,9 @@
+import { useState } from 'react'
+
 import './App.css'
 import NavBar from './components/NavBar'
 
-const categories = ['Highlight', 'Festival', 'Inspiration', 'General']
+const categories = ['All', 'Highlight', 'Festival', 'Inspiration', 'General']
 
 const author = {
   name: 'Anthony FS.',
@@ -98,7 +100,7 @@ function HeroSection() {
           <img
             src="/images/myphoto.jpg"
             alt="Author portrait"
-            className="aspect-[4/5] h-full w-full object-cover"
+            className="aspect-4/5 h-full w-full object-cover"
             loading="eager"
           />
         </div>
@@ -124,14 +126,23 @@ function HeroSection() {
 }
 
 function ArticleSection() {
+  const [selectedCategory, setSelectedCategory] = useState(categories[0])
+  const filteredArticles =
+    selectedCategory === 'All'
+      ? articles
+      : articles.filter((article) => article.category === selectedCategory)
+
   return (
     <section className="w-full px-5 pb-16 sm:px-8 sm:pb-20 lg:px-28">
       <div className="mx-auto max-w-7xl">
         <h2 className="text-base font-bold text-[#28241f]">Latest articles</h2>
-        <ArticleToolbar />
+        <ArticleToolbar
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
 
         <div className="mt-8 grid gap-x-6 gap-y-10 md:grid-cols-2">
-          {articles.map((article) => (
+          {filteredArticles.map((article) => (
             <ArticleCard key={article.title} article={article} />
           ))}
         </div>
@@ -149,23 +160,29 @@ function ArticleSection() {
   )
 }
 
-function ArticleToolbar() {
+function ArticleToolbar({ selectedCategory, onCategorySelect }) {
   return (
     <div className="mt-6 flex flex-col gap-4 rounded-sm bg-[#f6f5f2] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap gap-3">
-        {categories.map((category, index) => (
+        {categories.map((category) => {
+          const isSelected = category === selectedCategory
+
+          return (
           <button
             key={category}
             type="button"
+            onClick={() => onCategorySelect(category)}
+            aria-pressed={isSelected}
             className={`rounded-sm px-5 py-3 text-xs font-medium transition-colors ${
-              index === 0
+              isSelected
                 ? 'bg-[#e5e2dc] text-[#28241f]'
                 : 'text-[#75716b] hover:bg-[#ebe8e2] hover:text-[#28241f]'
             }`}
           >
             {category}
           </button>
-        ))}
+          )
+        })}
       </div>
 
       <label className="relative block w-full sm:max-w-[340px]">
@@ -189,7 +206,7 @@ function ArticleCard({ article }) {
       <img
         src={article.thumbnail}
         alt=""
-        className="aspect-[16/10] w-full rounded-lg object-cover"
+        className="aspect-16/10 w-full rounded-lg object-cover"
         loading="lazy"
       />
       <div className="mt-4">
