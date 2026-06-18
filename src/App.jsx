@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
 import './App.css'
+import closeIcon from './assets/icons/Close_round_light.svg'
+import expandDownIcon from './assets/icons/Expand_down_light.svg'
+import searchIcon from './assets/icons/Search_light.svg'
 import NavBar from './components/NavBar'
 
 const categories = ['All', 'Highlight', 'Festival', 'Inspiration', 'General']
@@ -161,42 +164,96 @@ function ArticleSection() {
 }
 
 function ArticleToolbar({ selectedCategory, onCategorySelect }) {
+  const [searchValue, setSearchValue] = useState('')
+
   return (
-    <div className="mt-6 flex flex-col gap-4 rounded-sm bg-[#f6f5f2] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap gap-3">
+    <div className="mt-6 rounded-sm bg-[#f6f5f2] p-4">
+      <div className="flex flex-col gap-5 sm:hidden">
+        <SearchField searchValue={searchValue} onSearchChange={setSearchValue} />
+
+        <label className="block">
+          <span className="mb-2 block text-xl font-semibold text-[#75716b]">
+            Category
+          </span>
+          <span className="relative block">
+            <select
+              value={selectedCategory}
+              onChange={(event) => onCategorySelect(event.target.value)}
+              className="h-[60px] w-full appearance-none rounded-lg border border-[#dedbd6] bg-white px-5 pr-12 text-xl font-semibold text-[#75716b] outline-none transition-colors focus:border-[#28241f]"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            <img
+              src={expandDownIcon}
+              alt=""
+              className="pointer-events-none absolute right-5 top-1/2 h-6 w-6 -translate-y-1/2"
+              aria-hidden="true"
+            />
+          </span>
+        </label>
+      </div>
+
+      <div className="hidden gap-4 sm:flex sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-3">
         {categories.map((category) => {
           const isSelected = category === selectedCategory
 
           return (
-          <button
-            key={category}
-            type="button"
-            onClick={() => onCategorySelect(category)}
-            aria-pressed={isSelected}
-            className={`rounded-sm px-5 py-3 text-xs font-medium transition-colors ${
-              isSelected
-                ? 'bg-[#e5e2dc] text-[#28241f]'
-                : 'text-[#75716b] hover:bg-[#ebe8e2] hover:text-[#28241f]'
-            }`}
-          >
-            {category}
-          </button>
+            <button
+              key={category}
+              type="button"
+              onClick={() => onCategorySelect(category)}
+              aria-pressed={isSelected}
+              className={`rounded-sm px-5 py-3 text-xs font-medium transition-colors ${
+                isSelected
+                  ? 'bg-[#e5e2dc] text-[#28241f]'
+                  : 'text-[#75716b] hover:bg-[#ebe8e2] hover:text-[#28241f]'
+              }`}
+            >
+              {category}
+            </button>
           )
         })}
-      </div>
+        </div>
 
-      <label className="relative block w-full sm:max-w-[340px]">
-        <span className="sr-only">Search articles</span>
-        <input
-          type="search"
-          placeholder="Search"
-          className="h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-4 pr-10 text-xs font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#9a958e] focus:border-[#28241f]"
-        />
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#9a958e]">
-          &#9906;
-        </span>
-      </label>
+        <SearchField searchValue={searchValue} onSearchChange={setSearchValue} />
+      </div>
     </div>
+  )
+}
+
+function SearchField({ searchValue, onSearchChange }) {
+  return (
+    <label className="relative block w-full sm:max-w-[340px]">
+      <span className="sr-only">Search articles</span>
+      <input
+        type="search"
+        value={searchValue}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder="Search"
+        className="search-input h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-4 pr-16 text-xs font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#9a958e] focus:border-[#28241f] max-sm:h-[60px] max-sm:rounded-lg max-sm:text-xl max-sm:font-semibold"
+      />
+      {searchValue && (
+        <button
+          type="button"
+          className="absolute right-9 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition-colors hover:bg-[#f0eee9] focus:outline-none focus:ring-2 focus:ring-[#28241f]"
+          aria-label="Clear search"
+          onClick={() => onSearchChange('')}
+        >
+          <img src={closeIcon} alt="" className="h-5 w-5" aria-hidden="true" />
+        </button>
+      )}
+      <img
+        src={searchIcon}
+        alt=""
+        className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60 max-sm:right-5 max-sm:h-6 max-sm:w-6"
+        aria-hidden="true"
+      />
+    </label>
   )
 }
 
