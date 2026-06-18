@@ -130,10 +130,29 @@ function HeroSection() {
 
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
-  const filteredArticles =
+  const [searchValue, setSearchValue] = useState('')
+  const searchQuery = searchValue.trim().toLowerCase()
+  const categoryFilteredArticles =
     selectedCategory === 'All'
       ? articles
       : articles.filter((article) => article.category === selectedCategory)
+  const filteredArticles = categoryFilteredArticles.filter((article) => {
+    if (!searchQuery) {
+      return true
+    }
+
+    const searchableText = [
+      article.title,
+      article.category,
+      article.introduction,
+      author.name,
+      author.bio,
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return searchableText.includes(searchQuery)
+  })
 
   return (
     <section className="w-full px-5 pb-16 sm:px-8 sm:pb-20 lg:px-28">
@@ -142,13 +161,21 @@ function ArticleSection() {
         <ArticleToolbar
           selectedCategory={selectedCategory}
           onCategorySelect={setSelectedCategory}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
         />
 
-        <div className="mt-8 grid gap-x-6 gap-y-10 md:grid-cols-2">
-          {filteredArticles.map((article) => (
-            <ArticleCard key={article.title} article={article} />
-          ))}
-        </div>
+        {filteredArticles.length > 0 ? (
+          <div className="mt-8 grid gap-x-6 gap-y-10 md:grid-cols-2">
+            {filteredArticles.map((article) => (
+              <ArticleCard key={article.title} article={article} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-8 rounded-lg bg-[#f6f5f2] px-5 py-8 text-center text-sm font-semibold text-[#75716b]">
+            No articles found.
+          </p>
+        )}
 
         <div className="mt-12 text-center">
           <a
@@ -163,13 +190,16 @@ function ArticleSection() {
   )
 }
 
-function ArticleToolbar({ selectedCategory, onCategorySelect }) {
-  const [searchValue, setSearchValue] = useState('')
-
+function ArticleToolbar({
+  selectedCategory,
+  onCategorySelect,
+  searchValue,
+  onSearchChange,
+}) {
   return (
     <div className="mt-6 rounded-sm bg-[#f6f5f2] p-4">
       <div className="flex flex-col gap-5 sm:hidden">
-        <SearchField searchValue={searchValue} onSearchChange={setSearchValue} />
+        <SearchField searchValue={searchValue} onSearchChange={onSearchChange} />
 
         <label className="block">
           <span className="mb-2 block text-xl font-semibold text-[#75716b]">
@@ -220,7 +250,7 @@ function ArticleToolbar({ selectedCategory, onCategorySelect }) {
         })}
         </div>
 
-        <SearchField searchValue={searchValue} onSearchChange={setSearchValue} />
+        <SearchField searchValue={searchValue} onSearchChange={onSearchChange} />
       </div>
     </div>
   )
