@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import closeIcon from '../assets/icons/Close_round_light.svg'
-import expandDownIcon from '../assets/icons/Expand_down_light.svg'
 import searchIcon from '../assets/icons/Search_light.svg'
+import { Input } from './ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 
 const categories = ['All', 'Highlight', 'Festival', 'Inspiration', 'General']
 
@@ -192,25 +200,24 @@ function ArticleToolbar({
             <span className="mb-2 block text-xl font-semibold text-[#75716b]">
               Category
             </span>
-            <span className="relative block">
-              <select
-                value={selectedCategory}
-                onChange={(event) => onCategorySelect(event.target.value)}
-                className="h-[60px] w-full appearance-none rounded-lg border border-[#dedbd6] bg-white px-5 pr-12 text-xl font-semibold text-[#75716b] outline-none transition-colors focus:border-[#28241f]"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <img
-                src={expandDownIcon}
-                alt=""
-                className="pointer-events-none absolute right-5 top-1/2 h-6 w-6 -translate-y-1/2"
-                aria-hidden="true"
-              />
-            </span>
+            <Select value={selectedCategory} onValueChange={onCategorySelect}>
+              <SelectTrigger className="h-[60px] w-full rounded-lg border-[#dedbd6] bg-white px-5 text-xl font-semibold text-[#75716b] shadow-none focus-visible:border-[#28241f] focus-visible:ring-0 [&_svg]:size-6 [&_svg]:text-[#28241f]">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent className="z-[60] rounded-lg border-[#dedbd6] bg-white text-[#28241f]">
+                <SelectGroup>
+                  {categories.map((category) => (
+                    <SelectItem
+                      key={category}
+                      value={category}
+                      className="py-3 text-base focus:bg-[#f6f5f2]"
+                    >
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </label>
         </div>
   
@@ -247,7 +254,7 @@ function SearchField({ searchValue, onSearchChange }) {
     return (
       <label className="relative block w-full sm:max-w-[340px]">
         <span className="sr-only">Search articles</span>
-        <input
+        <Input
           type="search"
           value={searchValue}
           onChange={(event) => onSearchChange(event.target.value)}
@@ -316,4 +323,3 @@ function ArticleMeta({ date }) {
       </div>
     )
 }
-
