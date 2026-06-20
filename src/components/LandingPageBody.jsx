@@ -94,7 +94,7 @@ export function HeroSection() {
             />
           </div>
   
-          <div className="mx-auto max-w-[310px] text-center md:mx-0 md:!text-left">
+          <div className="mx-auto max-w-[310px] text-center md:mx-0 md:text-left!">
             <p className="text-[10px] font-medium leading-none text-[#75716b]">
               -Author
             </p>
@@ -167,7 +167,7 @@ export function ArticleSection() {
           <div className="mt-12 text-center">
             <a
               href="/articles"
-              className="text-sm font-semibold text-[#28241f] underline underline-offset-4 transition-colors hover:text-[#12b379]"
+              className="text-sm font-semibold !text-black visited:!text-black underline underline-offset-4 transition-colors hover:!text-black"
             >
               View more
             </a>

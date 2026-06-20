@@ -2,6 +2,7 @@ import './App.css'
 
 import NavBar from './components/NavBar'
 import {HeroSection, ArticleSection} from './components/LandingPageBody'
+import Footer from './components/Footer'
 
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
       <NavBar />
       <HeroSection />
       <ArticleSection />
+      <Footer />
     </main>
   )
 }
