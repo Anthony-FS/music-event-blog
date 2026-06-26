@@ -1,7 +1,8 @@
 import './App.css'
 
 import NavBar from './components/NavBar'
-import {HeroSection, ArticleSection} from './components/LandingPageBody'
+import HeroSection from './components/HeroSection'
+import ArticleSection from './components/ArticleSection'
 import Footer from './components/Footer'
 
 
