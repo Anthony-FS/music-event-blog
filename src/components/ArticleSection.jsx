@@ -2,6 +2,7 @@ import { useState } from 'react'
 import closeIcon from '../assets/icons/Close_round_light.svg'
 import searchIcon from '../assets/icons/Search_light.svg'
 import { articles, author, categories } from '../data/blogPosts'
+import BlogCard from './BlogCard'
 import { Input } from './ui/input'
 import {
   Select,
@@ -28,8 +29,9 @@ function ArticleSection() {
     const searchableText = [
       article.title,
       article.category,
-      article.introduction,
-      author.name,
+      article.description,
+      article.author,
+      article.content,
       author.bio,
     ]
       .join(' ')
@@ -52,7 +54,16 @@ function ArticleSection() {
         {filteredArticles.length > 0 ? (
           <div className="mt-8 grid gap-x-6 gap-y-10 md:grid-cols-2">
             {filteredArticles.map((article) => (
-              <ArticleCard key={article.title} article={article} />
+              <BlogCard
+                key={article.id}
+                title={article.title}
+                category={article.category}
+                description={article.description}
+                date={article.date}
+                image={article.image}
+                authorName={article.author}
+                authorBio={author.bio}
+              />
             ))}
           </div>
         ) : (
@@ -167,49 +178,6 @@ function SearchField({ searchValue, onSearchChange }) {
         aria-hidden="true"
       />
     </label>
-  )
-}
-
-function ArticleCard({ article }) {
-  return (
-    <article className="overflow-hidden">
-      <img
-        src={article.thumbnail}
-        alt=""
-        className="aspect-16/10 w-full rounded-lg object-cover"
-        loading="lazy"
-      />
-      <div className="mt-4">
-        <span className="inline-flex rounded-full bg-[#d9f8ec] px-3 py-1 text-[11px] font-semibold text-[#12b379]">
-          {article.category}
-        </span>
-        <h3 className="mt-3 text-lg font-bold leading-snug text-[#28241f]">
-          {article.title}
-        </h3>
-        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]">
-          {article.introduction}
-        </p>
-        <ArticleMeta date={article.date} />
-      </div>
-    </article>
-  )
-}
-
-function ArticleMeta({ date }) {
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#75716b]">
-      <img
-        src="/images/myphoto.jpg"
-        alt=""
-        className="h-5 w-5 rounded-full object-cover"
-        loading="lazy"
-      />
-      <span className="font-semibold text-[#43403b]">{author.name}</span>
-      <span aria-hidden="true">|</span>
-      <span>{author.bio}</span>
-      <span aria-hidden="true">|</span>
-      <time dateTime="2024-09-11">{date}</time>
-    </div>
   )
 }
 
