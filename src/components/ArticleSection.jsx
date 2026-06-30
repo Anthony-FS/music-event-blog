@@ -67,7 +67,9 @@ function ArticleSection() {
   return (
     <section className="w-full px-5 pb-16 sm:px-8 sm:pb-20 lg:px-28">
       <div className="mx-auto max-w-7xl">
-        <h2 className="text-base font-bold text-[#28241f]">Latest articles</h2>
+        <h2 className="text-base font-bold text-[#28241f] max-sm:-mx-5 max-sm:px-5">
+          Latest articles
+        </h2>
         <ArticleToolbar
           selectedCategory={selectedCategory}
           onCategorySelect={setSelectedCategory}
@@ -99,7 +101,7 @@ function ArticleSection() {
             ))}
           </div>
         ) : (
-          <p className="mt-8 rounded-lg bg-[#f6f5f2] px-5 py-8 text-center text-sm font-semibold text-[#75716b]">
+          <p className="mt-10! rounded-lg bg-[#f6f5f2] px-5 py-8 text-center text-sm font-semibold text-[#75716b] sm:mt-10">
             No articles found.
           </p>
         )}
@@ -107,7 +109,7 @@ function ArticleSection() {
         <div className="mt-12 text-center">
           <a
             href="/articles"
-            className="text-sm font-semibold !text-black visited:!text-black underline underline-offset-4 transition-colors hover:!text-black"
+            className="text-sm font-semibold text-black! visited:text-black! underline underline-offset-4 transition-colors hover:text-black!"
           >
             View more
           </a>
@@ -124,8 +126,8 @@ function ArticleToolbar({
   onSearchChange,
 }) {
   return (
-    <div className="mt-6 rounded-sm bg-[#f6f5f2] p-4">
-      <div className="flex flex-col gap-5 sm:hidden">
+    <div className="mt-6 rounded-lg bg-[#f6f5f2] p-4 max-sm:relative max-sm:left-1/2 max-sm:w-screen max-sm:-translate-x-1/2 max-sm:rounded-none max-sm:p-1">
+      <div className="flex flex-col gap-4 sm:hidden">
         <SearchField searchValue={searchValue} onSearchChange={onSearchChange} />
 
         <label className="block">
@@ -133,10 +135,10 @@ function ArticleToolbar({
             Category
           </span>
           <Select value={selectedCategory} onValueChange={onCategorySelect}>
-            <SelectTrigger className="h-[60px] w-full rounded-lg border-[#dedbd6] bg-white px-5 text-xl font-semibold text-[#75716b] shadow-none focus-visible:border-[#28241f] focus-visible:ring-0 [&_svg]:size-6 [&_svg]:text-[#28241f]">
+            <SelectTrigger className="h-16! w-full overflow-hidden rounded-lg! border-[#dedbd6] bg-white px-6 text-xl font-semibold text-[#9a958e] shadow-none focus-visible:border-[#28241f] focus-visible:ring-0 [&_svg]:mr-1 [&_svg]:size-5 [&_svg]:text-[#28241f] [&_svg]:opacity-60">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
-            <SelectContent className="z-[60] rounded-lg border-[#dedbd6] bg-white text-[#28241f]">
+            <SelectContent className="z-60 rounded-lg border-[#dedbd6] bg-white text-[#28241f]">
               <SelectGroup>
                 {categories.map((category) => (
                   <SelectItem
@@ -164,9 +166,9 @@ function ArticleToolbar({
                 type="button"
                 onClick={() => onCategorySelect(category)}
                 aria-pressed={isSelected}
-                className={`rounded-sm px-5 py-3 text-xs font-medium transition-colors ${
+                className={`rounded-lg! px-6 py-2 text-xs font-medium transition-colors ${
                   isSelected
-                    ? 'bg-[#e5e2dc] text-[#28241f]'
+                    ? 'bg-[#e5e2dc] text-[#28241f] '
                     : 'text-[#75716b] hover:bg-[#ebe8e2] hover:text-[#28241f]'
                 }`}
               >
@@ -191,7 +193,7 @@ function SearchField({ searchValue, onSearchChange }) {
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Search"
-        className="search-input h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-4 pr-16 text-xs font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#9a958e] focus:border-[#28241f] max-sm:h-[60px] max-sm:rounded-lg max-sm:text-xl max-sm:font-semibold"
+        className="search-input h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-4 pr-16 text-xs font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#9a958e] focus:border-[#28241f] max-sm:h-16! max-sm:rounded-lg max-sm:text-xl max-sm:font-semibold"
       />
       {searchValue && (
         <button
