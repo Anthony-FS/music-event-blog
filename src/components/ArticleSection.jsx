@@ -29,6 +29,7 @@ function ArticleSection() {
         setError(null)
 
         const { data } = await api.get('/posts')
+        console.log('Articles from server:', data)
         setArticles(data.posts)
       } catch {
         setError('Failed to load articles. Please try again later.')
@@ -90,6 +91,7 @@ function ArticleSection() {
             {filteredArticles.map((article) => (
               <BlogCard
                 key={article.id}
+                id={article.id}
                 title={article.title}
                 category={article.category}
                 description={article.description}
