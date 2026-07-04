@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import closeIcon from '../assets/icons/Close_round_light.svg'
 import searchIcon from '../assets/icons/Search_light.svg'
-import { articles, author, categories } from '../data/blogPosts'
+import { author, categories } from '../data/blogPosts'
+import api from '../lib/axios'
+import { formatArticleDate } from '../utils/formatArticleDate'
 import BlogCard from './BlogCard'
 import { Input } from './ui/input'
 import {
@@ -14,8 +16,30 @@ import {
 } from './ui/select'
 
 function ArticleSection() {
+  const [articles, setArticles] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
   const [searchValue, setSearchValue] = useState('')
+
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const { data } = await api.get('/posts')
+        setArticles(data.posts)
+      } catch {
+        setError('Failed to load articles. Please try again later.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchArticles()
+  }, [])
+
   const searchQuery = searchValue.trim().toLowerCase()
   const categoryFilteredArticles =
     selectedCategory === 'All'
@@ -51,7 +75,15 @@ function ArticleSection() {
           onSearchChange={setSearchValue}
         />
 
-        {filteredArticles.length > 0 ? (
+        {isLoading ? (
+          <p className="mt-8 rounded-lg bg-[#f6f5f2] px-5 py-8 text-center text-sm font-semibold text-[#75716b]">
+            Loading articles...
+          </p>
+        ) : error ? (
+          <p className="mt-8 rounded-lg bg-[#f6f5f2] px-5 py-8 text-center text-sm font-semibold text-[#75716b]">
+            {error}
+          </p>
+        ) : filteredArticles.length > 0 ? (
           <div className="mt-8 grid gap-x-6 gap-y-10 md:grid-cols-2">
             {filteredArticles.map((article) => (
               <BlogCard
@@ -59,7 +91,7 @@ function ArticleSection() {
                 title={article.title}
                 category={article.category}
                 description={article.description}
-                date={article.date}
+                date={formatArticleDate(article.date)}
                 image={article.image}
                 authorName={article.author}
                 authorBio={author.bio}
