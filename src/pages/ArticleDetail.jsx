@@ -1,9 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
 import AuthorCard from '../components/AuthorCard'
+import CommentSection from '../components/CommentSection'
 import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
+import SocialBar from '../components/SocialBar'
 import api from '../lib/axios'
 import { formatArticleDate } from '../utils/formatArticleDate'
 import { normalizeArticleContent } from '../utils/normalizeArticleContent'
@@ -70,15 +72,9 @@ function ArticleDetail() {
                   </p>
 
                   <ArticleBody content={article.content} />
+                  <SocialBar likes={article.likes} />
+                  <CommentSection />
 
-                  <div className="mt-10">
-                    <Link
-                      to="/"
-                      className="text-sm font-semibold text-black! visited:text-black! underline underline-offset-4"
-                    >
-                      Back to home
-                    </Link>
-                  </div>
                 </div>
 
                 <AuthorCard author={article.author} />
