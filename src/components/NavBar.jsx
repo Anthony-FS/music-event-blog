@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import logo from '../assets/icons/logo.svg'
 import sandwichMenu from '../assets/icons/Sandwich_menu.svg'
@@ -18,9 +19,9 @@ const authLinks = [
 
 function NavLogo() {
   return (
-    <a href="/" aria-label="Home" className="inline-flex items-center">
+    <Link to="/" aria-label="Home" className="inline-flex items-center">
       <img src={logo} alt="hh." className="h-10 w-10 sm:h-12 sm:w-12" />
-    </a>
+    </Link>
   )
 }
 
@@ -31,13 +32,13 @@ function NavButton({ href, label, variant, onClick, className = '' }) {
       : 'border border-[#85817b] bg-white text-[#28241f] hover:bg-neutral-100'
 
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       onClick={onClick}
       className={`inline-flex h-10 min-w-[84px] items-center justify-center rounded-full px-5 text-sm font-semibold leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-[#28241f] focus:ring-offset-2 sm:h-11 sm:min-w-[116px] sm:px-7 ${variantClassName} ${className}`}
     >
       {label}
-    </a>
+    </Link>
   )
 }
 

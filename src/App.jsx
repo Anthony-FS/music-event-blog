@@ -1,19 +1,20 @@
 import './App.css'
 
-import NavBar from './components/NavBar'
-import HeroSection from './components/HeroSection'
-import ArticleSection from './components/ArticleSection'
-import Footer from './components/Footer'
+import { Routes, Route } from 'react-router-dom'
 
+import LandingPage from './pages/LandingPage'
+import LogInPage from './pages/LogInPage'
+import SignUpPage from './pages/SignUpPage'
+import ArticleDetail from './pages/ArticleDetail'
 
 function App() {
   return (
-    <main className="min-h-screen bg-white">
-      <NavBar />
-      <HeroSection />
-      <ArticleSection />
-      <Footer />
-    </main>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LogInPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/article/:id" element={<ArticleDetail />} />
+    </Routes>
   )
 }
 
