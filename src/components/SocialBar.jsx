@@ -26,20 +26,24 @@ function SocialBar({ likes = 0 }) {
         <button
           type="button"
           onClick={handleCopyLink}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-[#28241f] bg-white px-6 text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8]"
+          className="inline-flex h-10 items-center gap-2 rounded-full! border border-[#28241f] bg-white px-6 text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8]"
         >
           <Copy size={17} strokeWidth={1.8} />
           Copy link
         </button>
 
-        {socialLinks.map((link) => (
+        {socialLinks.map(({ label, href, icon, bg }) => (
           <a
-            key={link.label}
-            href={link.href}
-            aria-label={link.label}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${link.bg}`}
+            key={label}
+            href={href}
+            aria-label={label}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${bg}`}
           >
-            <img src={link.icon} alt="" className="h-5 w-5 invert" />
+            <img
+              src={icon}
+              alt=""
+              className="h-6 w-6 brightness-0 invert"
+            />
           </a>
         ))}
       </div>

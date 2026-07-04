@@ -37,7 +37,7 @@ function CommentSection() {
       <div className="mt-3 flex justify-end">
         <button
           type="button"
-          className="h-10 rounded-full bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#3a342e]"
+          className="h-10 rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#3a342e]"
         >
           Send
         </button>
