@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom'
+
 function BlogCard({
+  id,
   title,
   category,
   description,
@@ -8,26 +11,28 @@ function BlogCard({
   authorBio,
 }) {
   return (
-    <article className="overflow-hidden">
-      <img
-        src={image}
-        alt=""
-        className="aspect-16/10 w-full rounded-lg object-cover"
-        loading="lazy"
-      />
-      <div className="mt-4">
-        <span className="inline-flex rounded-full bg-[#d9f8ec] px-3 py-1 text-[11px] font-semibold text-[#12b379]">
-          {category}
-        </span>
-        <h3 className="mt-3 text-lg font-bold leading-snug text-[#28241f]">
-          {title}
-        </h3>
-        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]">
-          {description}
-        </p>
-        <BlogMeta date={date} authorName={authorName} authorBio={authorBio} />
-      </div>
-    </article>
+    <Link to={`/article/${id}`} className="block overflow-hidden">
+      <article>
+        <img
+          src={image}
+          alt=""
+          className="aspect-16/10 w-full rounded-lg object-cover"
+          loading="lazy"
+        />
+        <div className="mt-4">
+          <span className="inline-flex rounded-full bg-[#d9f8ec] px-3 py-1 text-[11px] font-semibold text-[#12b379]">
+            {category}
+          </span>
+          <h3 className="mt-3 text-lg font-bold leading-snug text-[#28241f]">
+            {title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]">
+            {description}
+          </p>
+          <BlogMeta date={date} authorName={authorName} authorBio={authorBio} />
+        </div>
+      </article>
+    </Link>
   )
 }
 
