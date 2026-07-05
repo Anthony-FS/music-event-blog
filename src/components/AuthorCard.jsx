@@ -1,6 +1,8 @@
-function AuthorCard({ author }) {
+function AuthorCard({ author, className = '' }) {
   return (
-    <aside className="rounded-lg bg-[#f6f5f2] px-4 py-6 lg:sticky lg:top-24">
+    <aside
+      className={`rounded-lg bg-[#f6f5f2] px-4 py-6 lg:sticky lg:top-24 ${className}`}
+    >
       <div className="flex items-center gap-3">
         <img
           src="/images/myphoto.jpg"

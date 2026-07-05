@@ -36,10 +36,10 @@ function ArticleDetail() {
   }, [id])
 
   return (
-    <main className="flex min-h-screen flex-col bg-white">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-white">
       <NavBar />
 
-      <section className="w-full flex-1 px-5 py-8 sm:px-8 sm:py-12 lg:px-28">
+      <section className="w-full flex-1 overflow-x-hidden px-5 pb-8 pt-0 sm:px-8 sm:py-12 lg:px-28">
         <div className="mx-auto max-w-7xl">
           {isLoading ? (
             <ArticleStateMessage message="Loading article..." />
@@ -47,12 +47,14 @@ function ArticleDetail() {
             <ArticleStateMessage message={error ?? 'Article not found.'} />
           ) : (
             <article>
-              <img
-                src={article.image}
-                alt=""
-                className="aspect-[2.25/1] w-full rounded-lg object-cover"
-                loading="eager"
-              />
+              <div className="relative left-1/2 w-dvw -translate-x-1/2 sm:left-auto sm:mt-10 sm:w-full sm:translate-x-0">
+                <img
+                  src={article.image}
+                  alt=""
+                  className="aspect-[2.25/1] w-full object-cover sm:rounded-lg"
+                  loading="eager"
+                />
+              </div>
 
               <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
                 <div>
@@ -72,12 +74,13 @@ function ArticleDetail() {
                   </p>
 
                   <ArticleBody content={article.content} />
+                  <AuthorCard author={article.author} className="mt-10 lg:hidden" />
                   <SocialBar likes={article.likes} />
                   <CommentSection />
 
                 </div>
 
-                <AuthorCard author={article.author} />
+                <AuthorCard author={article.author} className="hidden lg:block" />
               </div>
             </article>
           )}

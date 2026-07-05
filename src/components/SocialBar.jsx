@@ -47,43 +47,45 @@ function SocialBar({ likes = 0 }) {
   }
 
   return (
-    <div className="mt-10 flex flex-col gap-4 rounded-lg bg-[#f6f5f2] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <button
-        type="button"
-        onClick={requireAuth}
-        className="inline-flex h-10 w-fit items-center gap-2 rounded-full! border border-[#28241f] bg-white px-5 text-sm font-semibold text-[#28241f]"
-      >
-        <Smile size={18} strokeWidth={1.8} />
-        <span>{likes}</span>
-      </button>
+    <div className="relative isolate mt-10 flex flex-col gap-3 rounded-lg px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:bg-[#f6f5f2] sm:px-5 sm:py-4">
+      <div className="absolute inset-y-0 left-1/2 -z-10 w-dvw -translate-x-1/2 bg-[#f6f5f2] sm:hidden" />
 
-      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          onClick={handleCopyLink}
-          className="inline-flex h-10 items-center gap-2 rounded-full! border border-[#28241f] bg-white px-6 text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8]"
+          onClick={requireAuth}
+          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full! border border-[#28241f] bg-white px-5 text-sm font-semibold text-[#28241f] sm:h-10 sm:w-fit"
         >
-          <Copy size={17} strokeWidth={1.8} />
-          Copy link
+          <Smile size={18} strokeWidth={1.8} />
+          <span>{likes}</span>
         </button>
 
-        {socialLinks.map(({ label, icon, bg }) => (
-          <a
-            key={label}
-            href={getShareUrl(label)}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Share on ${label}`}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${bg}`}
+        <div className="grid grid-cols-[minmax(0,1fr)_36px_36px_36px] items-center gap-2 sm:flex sm:flex-wrap sm:justify-start sm:gap-3">
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full! border border-[#28241f] bg-white px-3 text-xs font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8] sm:h-10 sm:px-6 sm:text-sm"
           >
-            <img
-              src={icon}
-              alt=""
-              className="h-6 w-6 brightness-0 invert"
-            />
-          </a>
-        ))}
-      </div>
+            <Copy size={17} strokeWidth={1.8} />
+            <span className="truncate">Copy link</span>
+          </button>
+
+          {socialLinks.map(({ label, icon, bg }) => (
+            <a
+              key={label}
+              href={getShareUrl(label)}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Share on ${label}`}
+              className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 ${bg}`}
+            >
+              <img
+                src={icon}
+                alt=""
+                className="h-6 w-6 brightness-0 invert"
+              />
+            </a>
+          ))}
+        </div>
 
       <AuthRequiredDialog
         open={isAuthDialogOpen}
