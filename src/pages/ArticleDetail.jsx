@@ -36,10 +36,10 @@ function ArticleDetail() {
   }, [id])
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="flex min-h-screen flex-col bg-white">
       <NavBar />
 
-      <section className="w-full px-5 py-8 sm:px-8 sm:py-12 lg:px-28">
+      <section className="w-full flex-1 px-5 py-8 sm:px-8 sm:py-12 lg:px-28">
         <div className="mx-auto max-w-7xl">
           {isLoading ? (
             <ArticleStateMessage message="Loading article..." />

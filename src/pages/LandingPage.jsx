@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 
 function LandingPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="flex min-h-screen flex-col bg-white">
       <NavBar />
       <HeroSection />
       <ArticleSection />
