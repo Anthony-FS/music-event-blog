@@ -1,4 +1,4 @@
-export const categories = ['All', 'Highlight', 'Festival', 'Inspiration', 'General']
+export const categories = ['All', 'Cat', 'Inspiration', 'General']
 
 export const author = {
   name: 'Anthony FS.',

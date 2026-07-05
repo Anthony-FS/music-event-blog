@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import closeIcon from '../assets/icons/Close_round_light.svg'
 import searchIcon from '../assets/icons/Search_light.svg'
-import { author, categories } from '../data/blogPosts'
+import { author } from '../data/blogPosts'
 import api from '../lib/axios'
 import { formatArticleDate } from '../utils/formatArticleDate'
 import BlogCard from './BlogCard'
@@ -15,22 +15,55 @@ import {
   SelectValue,
 } from './ui/select'
 
+const POSTS_PER_PAGE = 6
+
 function ArticleSection() {
   const [articles, setArticles] = useState([])
+  const [categories, setCategories] = useState(['All'])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState(null)
-  const [selectedCategory, setSelectedCategory] = useState(categories[0])
+  const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchValue, setSearchValue] = useState('')
+  const [page, setPage] = useState(1)
+  const [hasMoreArticles, setHasMoreArticles] = useState(true)
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const { data } = await api.get('/posts')
+        const serverCategories = Array.from(
+          new Set(
+            data.posts
+              .map((article) => article.category)
+              .filter(Boolean),
+          ),
+        )
+
+        setCategories(['All', ...serverCategories])
+      } catch {
+        setCategories(['All'])
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   useEffect(() => {
     async function fetchArticles() {
       try {
         setIsLoading(true)
         setError(null)
+        setPage(1)
 
-        const { data } = await api.get('/posts')
-        console.log('Articles from server:', data)
-        setArticles(data.posts)
+        const { posts, hasMore } = await getPosts({
+          pageToFetch: 1,
+          selectedCategory,
+          searchValue,
+        })
+
+        setArticles(posts)
+        setHasMoreArticles(hasMore)
       } catch {
         setError('Failed to load articles. Please try again later.')
       } finally {
@@ -39,31 +72,31 @@ function ArticleSection() {
     }
 
     fetchArticles()
-  }, [])
+  }, [selectedCategory, searchValue])
 
-  const searchQuery = searchValue.trim().toLowerCase()
-  const categoryFilteredArticles =
-    selectedCategory === 'All'
-      ? articles
-      : articles.filter((article) => article.category === selectedCategory)
-  const filteredArticles = categoryFilteredArticles.filter((article) => {
-    if (!searchQuery) {
-      return true
+  const filteredArticles = articles
+
+  async function handleViewMore() {
+    const nextPage = page + 1
+
+    try {
+      setIsLoadingMore(true)
+
+      const { posts, hasMore } = await getPosts({
+        pageToFetch: nextPage,
+        selectedCategory,
+        searchValue,
+      })
+
+      setArticles((currentArticles) => [...currentArticles, ...posts])
+      setPage(nextPage)
+      setHasMoreArticles(hasMore)
+    } catch {
+      setError('Failed to load more articles. Please try again later.')
+    } finally {
+      setIsLoadingMore(false)
     }
-
-    const searchableText = [
-      article.title,
-      article.category,
-      article.description,
-      article.author,
-      article.content,
-      author.bio,
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchableText.includes(searchQuery)
-  })
+  }
 
   return (
     <section className="w-full px-5 pb-16 sm:px-8 sm:pb-20 lg:px-28">
@@ -72,6 +105,7 @@ function ArticleSection() {
           Latest articles
         </h2>
         <ArticleToolbar
+          categories={categories}
           selectedCategory={selectedCategory}
           onCategorySelect={setSelectedCategory}
           searchValue={searchValue}
@@ -108,20 +142,49 @@ function ArticleSection() {
           </p>
         )}
 
-        <div className="mt-12 text-center">
-          <a
-            href="/articles"
-            className="text-sm font-semibold text-black! visited:text-black! underline underline-offset-4 transition-colors hover:text-black!"
-          >
-            View more
-          </a>
-        </div>
+        {hasMoreArticles && (
+          <div className="mt-12 text-center">
+            <button
+              type="button"
+              onClick={handleViewMore}
+              disabled={isLoadingMore}
+              className="text-sm font-semibold text-black! visited:text-black! underline underline-offset-4 transition-colors hover:text-black!"
+            >
+              {isLoadingMore ? 'Loading...' : 'View more'}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
+async function getPosts({ pageToFetch, selectedCategory, searchValue }) {
+  const params = {
+    page: pageToFetch,
+    limit: POSTS_PER_PAGE,
+  }
+
+  if (selectedCategory !== 'All') {
+    params.category = selectedCategory
+  }
+
+  if (searchValue.trim()) {
+    params.search = searchValue.trim()
+  }
+
+  const { data } = await api.get('/posts', { params })
+  const posts = data.posts ?? []
+  const hasMore =
+    typeof data.hasMore === 'boolean'
+      ? data.hasMore
+      : posts.length === POSTS_PER_PAGE
+
+  return { posts, hasMore }
+}
+
 function ArticleToolbar({
+  categories,
   selectedCategory,
   onCategorySelect,
   searchValue,
