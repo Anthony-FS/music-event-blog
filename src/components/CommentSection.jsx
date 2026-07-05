@@ -1,3 +1,7 @@
+import { useState } from 'react'
+
+import AuthRequiredDialog from './AuthRequiredDialog'
+
 const comments = [
   {
     name: 'Jacob Lash',
@@ -23,6 +27,18 @@ const comments = [
 ]
 
 function CommentSection() {
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+
+  function requireAuth(event) {
+    if (!localStorage.getItem('token')) {
+      event?.preventDefault()
+      setIsAuthDialogOpen(true)
+      return false
+    }
+
+    return true
+  }
+
   return (
     <section className="mt-12 w-full">
       <label className="block w-full">
@@ -30,6 +46,7 @@ function CommentSection() {
         <textarea
           rows={4}
           placeholder="What are your thoughts?"
+          onFocus={requireAuth}
           className="mt-2 block min-h-[112px] w-full resize-y rounded-lg border border-[#dedbd6] bg-white px-4 py-3 text-sm font-medium text-[#28241f] outline-none placeholder:text-[#75716b] focus:border-[#28241f]"
         />
       </label>
@@ -37,6 +54,7 @@ function CommentSection() {
       <div className="mt-3 flex justify-end">
         <button
           type="button"
+          onClick={requireAuth}
           className="h-10 rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#3a342e]"
         >
           Send
@@ -66,12 +84,17 @@ function CommentSection() {
               </div>
             </div>
 
-            <p className="mt-5 text-sm font-medium leading-6 text-[#75716b]">
+            <p className="mt-3 text-sm font-medium leading-6 text-[#75716b]">
               {comment.message}
             </p>
           </article>
         ))}
       </div>
+
+      <AuthRequiredDialog
+        open={isAuthDialogOpen}
+        onOpenChange={setIsAuthDialogOpen}
+      />
     </section>
   )
 }
