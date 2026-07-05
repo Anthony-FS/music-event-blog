@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Copy, Smile } from 'lucide-react'
+import { toast } from 'sonner'
 
 import facebookIcon from '../assets/icons/Facebook_black.svg'
 import linkedInIcon from '../assets/icons/LinkedIN_black.svg'
@@ -7,10 +8,22 @@ import twitterIcon from '../assets/icons/Twitter_black.svg'
 import AuthRequiredDialog from './AuthRequiredDialog'
 
 const socialLinks = [
-  { label: 'Facebook', href: '#', icon: facebookIcon, bg: 'bg-[#1877f2]' },
-  { label: 'LinkedIn', href: '#', icon: linkedInIcon, bg: 'bg-[#0a66c2]' },
-  { label: 'Twitter', href: '#', icon: twitterIcon, bg: 'bg-[#55acee]' },
+  { label: 'Facebook', icon: facebookIcon, bg: 'bg-[#1877f2]' },
+  { label: 'LinkedIn', icon: linkedInIcon, bg: 'bg-[#0a66c2]' },
+  { label: 'Twitter', icon: twitterIcon, bg: 'bg-[#55acee]' },
 ]
+
+function getShareUrl(platform) {
+  const articleUrl = encodeURIComponent(window.location.href)
+
+  const shareUrls = {
+    Facebook: `https://www.facebook.com/share.php?u=${articleUrl}`,
+    LinkedIn: `https://www.linkedin.com/sharing/share-offsite/?url=${articleUrl}`,
+    Twitter: `https://www.twitter.com/share?&url=${articleUrl}`,
+  }
+
+  return shareUrls[platform]
+}
 
 function SocialBar({ likes = 0 }) {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
@@ -24,8 +37,13 @@ function SocialBar({ likes = 0 }) {
     return true
   }
 
-  function handleCopyLink() {
-    navigator.clipboard?.writeText(window.location.href)
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('Link saved to clipboard.')
+    } catch {
+      toast.error('Unable to copy link.')
+    }
   }
 
   return (
@@ -49,11 +67,13 @@ function SocialBar({ likes = 0 }) {
           Copy link
         </button>
 
-        {socialLinks.map(({ label, href, icon, bg }) => (
+        {socialLinks.map(({ label, icon, bg }) => (
           <a
             key={label}
-            href={href}
-            aria-label={label}
+            href={getShareUrl(label)}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Share on ${label}`}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${bg}`}
           >
             <img
