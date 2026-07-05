@@ -65,6 +65,16 @@ function ArticleSection() {
   }, [selectedCategory, searchValue])
 
   const filteredArticles = articles
+  const normalizedSearchValue = searchValue.trim().toLowerCase()
+  const searchResults = normalizedSearchValue
+    ? articles.filter((article) =>
+        [article.title, article.description, article.content]
+          .filter(Boolean)
+          .some((value) =>
+            String(value).toLowerCase().includes(normalizedSearchValue),
+          ),
+      )
+    : []
 
   async function handleViewMore() {
     const nextPage = page + 1
@@ -100,6 +110,7 @@ function ArticleSection() {
           onCategorySelect={setSelectedCategory}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
+          searchResults={searchResults}
         />
 
         {isLoading ? (

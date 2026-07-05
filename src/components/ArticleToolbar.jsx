@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 import closeIcon from '../assets/icons/Close_round_light.svg'
 import searchIcon from '../assets/icons/Search_light.svg'
 import { Input } from './ui/input'
@@ -16,11 +18,16 @@ function ArticleToolbar({
   onCategorySelect,
   searchValue,
   onSearchChange,
+  searchResults,
 }) {
   return (
     <div className="mt-6 rounded-lg bg-[#f6f5f2] p-4 max-sm:relative max-sm:left-1/2 max-sm:w-screen max-sm:-translate-x-1/2 max-sm:rounded-none max-sm:p-1">
       <div className="flex flex-col gap-4 sm:hidden">
-        <SearchField searchValue={searchValue} onSearchChange={onSearchChange} />
+        <SearchField
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+          searchResults={searchResults}
+        />
 
         <label className="block">
           <span className="mb-2 block text-xl font-semibold text-[#75716b]">
@@ -70,13 +77,19 @@ function ArticleToolbar({
           })}
         </div>
 
-        <SearchField searchValue={searchValue} onSearchChange={onSearchChange} />
+        <SearchField
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+          searchResults={searchResults}
+        />
       </div>
     </div>
   )
 }
 
-function SearchField({ searchValue, onSearchChange }) {
+function SearchField({ searchValue, onSearchChange, searchResults = [] }) {
+  const showResults = searchValue.trim().length > 0
+
   return (
     <label className="relative block w-full sm:max-w-[340px]">
       <span className="sr-only">Search articles</span>
@@ -103,6 +116,26 @@ function SearchField({ searchValue, onSearchChange }) {
         className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60 max-sm:right-5 max-sm:h-6 max-sm:w-6"
         aria-hidden="true"
       />
+
+      {showResults && (
+        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 rounded-lg border border-[#dedbd6] bg-white p-2 shadow-lg">
+          {searchResults.length > 0 ? (
+            searchResults.map((article) => (
+              <Link
+                key={article.id}
+                to={`/article/${article.id}`}
+                className="block rounded-lg px-4 py-3 text-sm font-semibold leading-snug text-[#28241f]! no-underline! transition-colors visited:text-[#28241f]! hover:bg-[#f6f5f2] hover:text-[#28241f]! sm:text-lg"
+              >
+                {article.title}
+              </Link>
+            ))
+          ) : (
+            <p className="px-4 py-3 text-sm font-semibold text-[#75716b]">
+              No articles found.
+            </p>
+          )}
+        </div>
+      )}
     </label>
   )
 }

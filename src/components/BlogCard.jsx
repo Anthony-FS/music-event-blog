@@ -11,7 +11,10 @@ function BlogCard({
   authorBio,
 }) {
   return (
-    <Link to={`/article/${id}`} className="block overflow-hidden">
+    <Link
+      to={`/article/${id}`}
+      className="block overflow-hidden text-[#28241f]! no-underline! visited:text-[#28241f]!"
+    >
       <article>
         <img
           src={image}
@@ -23,10 +26,10 @@ function BlogCard({
           <span className="inline-flex rounded-full bg-[#d9f8ec] px-3 py-1 text-[11px] font-semibold text-[#12b379]">
             {category}
           </span>
-          <h3 className="mt-3 text-lg font-bold leading-snug text-[#28241f]">
+          <h3 className="mt-3 text-lg font-bold leading-snug text-[#28241f]! no-underline!">
             {title}
           </h3>
-          <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]">
+          <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]! no-underline!">
             {description}
           </p>
           <BlogMeta date={date} authorName={authorName} authorBio={authorBio} />
