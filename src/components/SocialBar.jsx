@@ -33,7 +33,7 @@ function SocialBar({ likes = 0 }) {
       <button
         type="button"
         onClick={requireAuth}
-        className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[#28241f] bg-white px-5 text-sm font-semibold text-[#28241f]"
+        className="inline-flex h-10 w-fit items-center gap-2 rounded-full! border border-[#28241f] bg-white px-5 text-sm font-semibold text-[#28241f]"
       >
         <Smile size={18} strokeWidth={1.8} />
         <span>{likes}</span>

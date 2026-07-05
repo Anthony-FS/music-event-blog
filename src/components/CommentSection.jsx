@@ -84,7 +84,7 @@ function CommentSection() {
               </div>
             </div>
 
-            <p className="mt-5 text-sm font-medium leading-6 text-[#75716b]">
+            <p className="mt-3 text-sm font-medium leading-6 text-[#75716b]">
               {comment.message}
             </p>
           </article>
