@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import bellIcon from '../assets/icons/Bell_light.svg'
+import expandDownIcon from '../assets/icons/Expand_down_light.svg'
 import logo from '../assets/icons/logo.svg'
+import outIcon from '../assets/icons/Out_light.svg'
+import refreshIcon from '../assets/icons/Refresh_light.svg'
 import sandwichMenu from '../assets/icons/Sandwich_menu.svg'
+import userIcon from '../assets/icons/User_duotone.svg'
 
 const authLinks = [
   {
@@ -16,6 +21,20 @@ const authLinks = [
     variant: 'primary',
   },
 ]
+
+function getStoredMember() {
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    return null
+  }
+
+  try {
+    return JSON.parse(localStorage.getItem('member')) ?? null
+  } catch {
+    return null
+  }
+}
 
 function NavLogo() {
   return (
@@ -49,6 +68,87 @@ function NavActions() {
         <NavButton key={link.href} {...link} />
       ))}
     </div>
+  )
+}
+
+function MemberActions({ member, onLogOut }) {
+  const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
+
+  function handleMemberMenuToggle(event) {
+    event.preventDefault()
+    setIsMemberMenuOpen((currentValue) => !currentValue)
+  }
+
+  function handleLogOutClick() {
+    setIsMemberMenuOpen(false)
+    onLogOut()
+  }
+
+  return (
+    <div className="relative flex shrink-0 items-center gap-3">
+      <button
+        type="button"
+        aria-label="Notifications"
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full! border border-[#dedbd6] bg-white transition-colors hover:bg-[#eeece8]!"
+      >
+        <img src={bellIcon} alt="" className="h-4 w-4" aria-hidden="true" />
+      </button>
+
+      <div className="relative flex h-9 items-center">
+        <button
+          type="button"
+          className="inline-flex h-9 items-center gap-2 rounded-full bg-transparent px-0 py-0 leading-none"
+          aria-label="Member menu"
+          aria-expanded={isMemberMenuOpen}
+          aria-controls="member-menu"
+          onClick={handleMemberMenuToggle}
+        >
+          <img
+            src="/images/myphoto.jpg"
+            alt=""
+            className="h-8 w-8 rounded-full object-cover"
+          />
+          <span className="hidden max-w-[120px] truncate text-xs font-medium leading-none text-[#28241f] sm:inline">
+            {member?.name ?? 'Member'}
+          </span>
+          <img
+            src={expandDownIcon}
+            alt=""
+            className="hidden h-3 w-3 shrink-0 sm:block"
+            aria-hidden="true"
+          />
+        </button>
+
+        {isMemberMenuOpen && (
+          <div
+            id="member-menu"
+            className="absolute right-0 top-[calc(100%+0.75rem)] z-50 flex w-[230px] flex-col items-stretch overflow-hidden rounded-lg border border-[#dedbd6] bg-white py-2 text-left shadow-lg"
+          >
+            <MemberMenuItem icon={userIcon} label="Profile" />
+            <MemberMenuItem icon={refreshIcon} label="Reset password" />
+            <div className="my-1 h-px bg-[#dedbd6]" />
+            <MemberMenuItem
+              icon={outIcon}
+              label="Log out"
+              onClick={handleLogOutClick}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function MemberMenuItem({ icon, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex! w-full items-center justify-start! gap-4 px-4 py-3 text-left! text-base font-semibold whitespace-nowrap text-[#43403b] transition-colors hover:bg-[#f6f5f2]"
+    >
+      <img src={icon} alt="" className="h-5 w-5" aria-hidden="true" />
+      <span>{label}</span>
+    </button>
   )
 }
 
@@ -93,6 +193,8 @@ function MobileNavMenu({ isOpen, onLinkClick }) {
 
 function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [member, setMember] = useState(getStoredMember)
+  const isLoggedIn = Boolean(member)
 
   function handleMobileMenuToggle() {
     setIsMobileMenuOpen((currentValue) => !currentValue)
@@ -102,6 +204,12 @@ function NavBar() {
     setIsMobileMenuOpen(false)
   }
 
+  function handleLogOut() {
+    localStorage.removeItem('token')
+    localStorage.removeItem('member')
+    setMember(null)
+  }
+
   return (
     <header className="w-full border-b border-[#dedbd6] bg-[#faf9f7]">
       <nav
@@ -109,16 +217,24 @@ function NavBar() {
         aria-label="Main navigation"
       >
         <NavLogo />
-        <NavActions />
-        <MobileMenuButton
-          isOpen={isMobileMenuOpen}
-          onClick={handleMobileMenuToggle}
-        />
+        {isLoggedIn ? (
+          <MemberActions member={member} onLogOut={handleLogOut} />
+        ) : (
+          <>
+            <NavActions />
+            <MobileMenuButton
+              isOpen={isMobileMenuOpen}
+              onClick={handleMobileMenuToggle}
+            />
+          </>
+        )}
       </nav>
-      <MobileNavMenu
-        isOpen={isMobileMenuOpen}
-        onLinkClick={handleMobileMenuClose}
-      />
+      {!isLoggedIn && (
+        <MobileNavMenu
+          isOpen={isMobileMenuOpen}
+          onLinkClick={handleMobileMenuClose}
+        />
+      )}
     </header>
   )
 }
