@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import NavBar from '../components/NavBar'
+import { authenticateMember } from '../data/memberlogin'
 import { validateLogInForm } from '../utils/validateLogInForm'
 
 const initialFormValues = {
@@ -13,6 +14,7 @@ function LogInPage() {
   const navigate = useNavigate()
   const [formValues, setFormValues] = useState(initialFormValues)
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
 
   function handleInputChange(event) {
     const { name, value } = event.target
@@ -28,6 +30,10 @@ function LogInPage() {
         [name]: '',
       }))
     }
+
+    if (submitError) {
+      setSubmitError('')
+    }
   }
 
   function handleSubmit(event) {
@@ -35,10 +41,28 @@ function LogInPage() {
 
     const nextErrors = validateLogInForm(formValues)
     setErrors(nextErrors)
+    setSubmitError('')
 
-    if (Object.keys(nextErrors).length === 0) {
-      navigate('/')
+    if (Object.keys(nextErrors).length > 0) {
+      return
     }
+
+    const member = authenticateMember(formValues.email, formValues.password)
+
+    if (!member) {
+      setSubmitError('Invalid email or password.')
+      return
+    }
+
+    localStorage.setItem('token', String(member.id))
+    localStorage.setItem('member', JSON.stringify({
+      id: member.id,
+      name: member.name,
+      username: member.username,
+      email: member.email,
+    }))
+
+    navigate('/')
   }
 
   return (
@@ -84,6 +108,12 @@ function LogInPage() {
             >
               Log in
             </button>
+
+            {submitError && (
+              <p className="text-center text-xs font-semibold text-red-600">
+                {submitError}
+              </p>
+            )}
           </div>
 
           <p className="mt-4 text-center text-sm font-medium text-[#75716b]">
