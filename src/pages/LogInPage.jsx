@@ -60,6 +60,7 @@ function LogInPage() {
       name: member.name,
       username: member.username,
       email: member.email,
+      role: member.role ?? 'member',
     }))
 
     navigate('/')

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import bellIcon from '../assets/icons/Bell_light.svg'
 import expandDownIcon from '../assets/icons/Expand_down_light.svg'
+import fileIcon from '../assets/icons/File_light.svg'
 import logo from '../assets/icons/logo.svg'
 import outIcon from '../assets/icons/Out_light.svg'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
@@ -73,6 +74,7 @@ function NavActions() {
 
 function MemberActions({ member, onLogOut }) {
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
+  const isAdmin = member?.role === 'admin' || member?.name === 'Admin'
 
   function handleMemberMenuToggle(event) {
     event.preventDefault()
@@ -124,8 +126,26 @@ function MemberActions({ member, onLogOut }) {
             id="member-menu"
             className="absolute right-0 top-[calc(100%+0.75rem)] z-50 flex w-[230px] flex-col items-stretch overflow-hidden rounded-lg border border-[#dedbd6] bg-white py-2 text-left shadow-lg"
           >
-            <MemberMenuItem icon={userIcon} label="Profile" />
-            <MemberMenuItem icon={refreshIcon} label="Reset password" />
+            <MemberMenuItem
+              icon={userIcon}
+              label="Profile"
+              href="/member-management"
+              onClick={() => setIsMemberMenuOpen(false)}
+            />
+            <MemberMenuItem
+              icon={refreshIcon}
+              label="Reset password"
+              href="/member-management/reset-password"
+              onClick={() => setIsMemberMenuOpen(false)}
+            />
+            {isAdmin && (
+              <MemberMenuItem
+                icon={fileIcon}
+                label="Admin panel"
+                href="/admin"
+                onClick={() => setIsMemberMenuOpen(false)}
+              />
+            )}
             <div className="my-1 h-px bg-[#dedbd6]" />
             <MemberMenuItem
               icon={outIcon}
@@ -139,15 +159,27 @@ function MemberActions({ member, onLogOut }) {
   )
 }
 
-function MemberMenuItem({ icon, label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex! w-full items-center justify-start! gap-4 px-4 py-3 text-left! text-base font-semibold whitespace-nowrap text-[#43403b] transition-colors hover:bg-[#f6f5f2]"
-    >
+function MemberMenuItem({ icon, label, href, onClick }) {
+  const className =
+    'flex! w-full items-center justify-start! gap-4 px-4 py-3 text-left! text-base font-semibold whitespace-nowrap text-[#43403b]! no-underline! transition-colors visited:text-[#43403b]! hover:bg-[#f6f5f2] hover:text-[#43403b]!'
+  const content = (
+    <>
       <img src={icon} alt="" className="h-5 w-5" aria-hidden="true" />
       <span>{label}</span>
+    </>
+  )
+
+  if (href) {
+    return (
+      <Link to={href} onClick={onClick} className={className}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
     </button>
   )
 }
