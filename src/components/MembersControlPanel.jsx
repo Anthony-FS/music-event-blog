@@ -1,9 +1,46 @@
 import { Link } from 'react-router-dom'
 
+import bellIcon from '../assets/icons/Bell_light.svg'
+import fileIcon from '../assets/icons/File_light.svg'
+import folderIcon from '../assets/icons/Img_box_light.svg'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
 import userIcon from '../assets/icons/User_duotone.svg'
 
-function MembersControlPanel({ memberName, avatarUrl, activeView }) {
+const adminLinks = [
+  {
+    id: 'articles',
+    label: 'Article management',
+    icon: fileIcon,
+  },
+  {
+    id: 'categories',
+    label: 'Category management',
+    icon: folderIcon,
+  },
+  {
+    id: 'profile',
+    label: 'Profile',
+    icon: userIcon,
+  },
+  {
+    id: 'notifications',
+    label: 'Notification',
+    icon: bellIcon,
+  },
+  {
+    id: 'reset-password',
+    label: 'Reset password',
+    icon: refreshIcon,
+  },
+]
+
+function MembersControlPanel({
+  memberName,
+  avatarUrl,
+  activeView,
+  isAdmin = false,
+  onAdminViewChange,
+}) {
   return (
     <aside className="space-y-8">
       <div className="flex items-center gap-4">
@@ -17,21 +54,50 @@ function MembersControlPanel({ memberName, avatarUrl, activeView }) {
         </p>
       </div>
 
-      <nav aria-label="Member settings" className="space-y-4 pl-4">
-        <MemberSideLink
-          icon={userIcon}
-          label="Profile"
-          href="/member-management"
-          isActive={activeView === 'profile'}
-        />
-        <MemberSideLink
-          icon={refreshIcon}
-          label="Reset password"
-          href="/member-management/reset-password"
-          isActive={activeView === 'reset-password'}
-        />
-      </nav>
+      {isAdmin ? (
+        <nav aria-label="Admin settings" className="space-y-4 pl-4">
+          {adminLinks.map((link) => (
+            <MemberSideButton
+              key={link.id}
+              icon={link.icon}
+              label={link.label}
+              isActive={activeView === link.id}
+              onClick={() => onAdminViewChange?.(link.id)}
+            />
+          ))}
+        </nav>
+      ) : (
+        <nav aria-label="Member settings" className="space-y-4 pl-4">
+          <MemberSideLink
+            icon={userIcon}
+            label="Profile"
+            href="/member-management"
+            isActive={activeView === 'profile'}
+          />
+          <MemberSideLink
+            icon={refreshIcon}
+            label="Reset password"
+            href="/member-management/reset-password"
+            isActive={activeView === 'reset-password'}
+          />
+        </nav>
+      )}
     </aside>
+  )
+}
+
+function MemberSideButton({ icon, label, isActive = false, onClick }) {
+  return (
+    <button
+      type="button"
+      className={`flex w-full items-center gap-3 text-left text-sm text-[#28241f]! transition-colors hover:text-[#28241f]! ${
+        isActive ? 'font-bold' : 'font-semibold'
+      }`}
+      onClick={onClick}
+    >
+      <img src={icon} alt="" className="h-4 w-4" aria-hidden="true" />
+      <span>{label}</span>
+    </button>
   )
 }
 
