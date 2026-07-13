@@ -1,5 +1,8 @@
 import bellIcon from '../assets/icons/Bell_light.svg'
-import { mockNotifications } from '../data/notifications'
+import {
+  getNotificationActionText,
+  mockNotifications,
+} from '../data/notifications'
 
 function NotificationMenu({ isOpen, onToggle }) {
   return (
@@ -23,8 +26,9 @@ function NotificationMenu({ isOpen, onToggle }) {
           {mockNotifications.map((notification) => (
             <NotificationMenuItem
               key={notification.id}
-              title={notification.title}
-              message={notification.message}
+              userName={notification.userName}
+              actionText={getNotificationActionText(notification.type)}
+              articleTitle={notification.articleTitle}
             />
           ))}
         </div>
@@ -33,12 +37,14 @@ function NotificationMenu({ isOpen, onToggle }) {
   )
 }
 
-function NotificationMenuItem({ title, message }) {
+function NotificationMenuItem({ userName, actionText, articleTitle }) {
   return (
     <div className="px-4 py-3 text-[#43403b] transition-colors hover:bg-[#f6f5f2]">
-      <p className="text-sm font-semibold">{title}</p>
+      <p className="text-sm font-semibold">
+        {userName} {actionText}
+      </p>
       <p className="mt-1 text-xs font-medium leading-relaxed text-[#75716b]">
-        {message}
+        {articleTitle}
       </p>
     </div>
   )
