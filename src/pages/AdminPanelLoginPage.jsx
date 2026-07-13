@@ -16,9 +16,10 @@ const initialFormValues = {
 }
 
 const initialAdminMember = {
-  name: 'Admin',
-  username: 'admin',
-  email: 'admin@example.com',
+  name: 'Thompson P.',
+  username: 'thompson',
+  email: 'thompson.p@gmail.com',
+  bio: 'I am a pet enthusiast and freelance writer who specializes in animal behavior and care.',
   role: 'admin',
 }
 
