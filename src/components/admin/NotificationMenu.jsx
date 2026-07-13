@@ -1,8 +1,8 @@
-import bellIcon from '../assets/icons/Bell_light.svg'
+import bellIcon from '../../assets/icons/Bell_light.svg'
 import {
   getNotificationActionParts,
   mockNotifications,
-} from '../data/notifications'
+} from '../../data/notifications'
 
 function NotificationMenu({ isOpen, onToggle }) {
   const hasNotifications = mockNotifications.length > 0

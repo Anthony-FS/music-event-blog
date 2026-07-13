@@ -1,7 +1,7 @@
-import NavBar from '../components/NavBar'
-import HeroSection from '../components/HeroSection'
-import ArticleSection from '../components/ArticleSection'
-import Footer from '../components/Footer'
+import NavBar from '../components/layout/NavBar'
+import HeroSection from '../components/blog/HeroSection'
+import ArticleSection from '../components/blog/ArticleSection'
+import Footer from '../components/layout/Footer'
 
 function LandingPage() {
   return (

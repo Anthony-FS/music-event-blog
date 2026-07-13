@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { author } from '../data/blogPosts'
-import api from '../lib/axios'
-import { formatArticleDate } from '../utils/formatArticleDate'
+import { author } from '../../data/blogPosts'
+import api from '../../lib/axios'
+import { formatArticleDate } from '../../utils/formatArticleDate'
 import ArticleToolbar from './ArticleToolbar'
 import BlogCard from './BlogCard'
 

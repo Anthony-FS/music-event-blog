@@ -3,21 +3,23 @@ import { Link } from 'react-router-dom'
 import {
   getNotificationActionText,
   mockNotifications,
-} from '../data/notifications'
+} from '../../data/notifications'
+import {
+  AdminPageHeader,
+  AdminPageShell,
+} from '../shared/AdminPageShell'
 
 function NotificationManagement() {
   return (
-    <section className="flex min-h-screen min-w-0 flex-1 flex-col bg-white">
-      <header className="flex shrink-0 min-h-[88px] items-center border-b border-[#dedbd6] px-6 py-5 sm:px-10">
-        <h1 className="text-xl font-bold text-[#28241f]">Notification</h1>
-      </header>
+    <AdminPageShell variant="content">
+      <AdminPageHeader title="Notification" />
 
       <div className="min-h-0 flex-1 divide-y divide-[#dedbd6] border-b border-[#dedbd6]">
         {mockNotifications.map((notification) => (
           <NotificationItem key={notification.id} notification={notification} />
         ))}
       </div>
-    </section>
+    </AdminPageShell>
   )
 }
 

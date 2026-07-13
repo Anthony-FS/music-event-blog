@@ -1,8 +1,4 @@
-import { Link } from 'react-router-dom'
-
-import closeIcon from '../assets/icons/Close_round_light.svg'
-import searchIcon from '../assets/icons/Search_light.svg'
-import { Input } from './ui/input'
+import SearchField from '../shared/SearchField'
 import {
   Select,
   SelectContent,
@@ -10,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select'
+} from '../ui/select'
 
 function ArticleToolbar({
   categories,
@@ -27,6 +23,8 @@ function ArticleToolbar({
           searchValue={searchValue}
           onSearchChange={onSearchChange}
           searchResults={searchResults}
+          variant="public"
+          label="Search articles"
         />
 
         <label className="block">
@@ -81,62 +79,11 @@ function ArticleToolbar({
           searchValue={searchValue}
           onSearchChange={onSearchChange}
           searchResults={searchResults}
+          variant="public"
+          label="Search articles"
         />
       </div>
     </div>
-  )
-}
-
-function SearchField({ searchValue, onSearchChange, searchResults = [] }) {
-  const showResults = searchValue.trim().length > 0
-
-  return (
-    <label className="relative block w-full sm:max-w-[340px]">
-      <span className="sr-only">Search articles</span>
-      <Input
-        type="search"
-        value={searchValue}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search"
-        className="search-input h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-4 pr-16 text-xs font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#9a958e] focus:border-[#28241f] max-sm:h-16! max-sm:rounded-lg max-sm:text-xl max-sm:font-semibold"
-      />
-      {searchValue && (
-        <button
-          type="button"
-          className="absolute right-9 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition-colors hover:bg-[#f0eee9] focus:outline-none focus:ring-2 focus:ring-[#28241f]"
-          aria-label="Clear search"
-          onClick={() => onSearchChange('')}
-        >
-          <img src={closeIcon} alt="" className="h-5 w-5" aria-hidden="true" />
-        </button>
-      )}
-      <img
-        src={searchIcon}
-        alt=""
-        className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60 max-sm:right-5 max-sm:h-6 max-sm:w-6"
-        aria-hidden="true"
-      />
-
-      {showResults && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 rounded-lg border border-[#dedbd6] bg-white p-2 shadow-lg">
-          {searchResults.length > 0 ? (
-            searchResults.map((article) => (
-              <Link
-                key={article.id}
-                to={`/article/${article.id}`}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold leading-snug text-[#28241f]! no-underline! transition-colors visited:text-[#28241f]! hover:bg-[#f6f5f2] hover:text-[#28241f]! sm:text-lg"
-              >
-                {article.title}
-              </Link>
-            ))
-          ) : (
-            <p className="px-4 py-3 text-sm font-semibold text-[#75716b]">
-              No articles found.
-            </p>
-          )}
-        </div>
-      )}
-    </label>
   )
 }
 

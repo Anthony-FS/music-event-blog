@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import NavBar from '../components/NavBar'
+import NavBar from '../components/layout/NavBar'
+import FormTextInput from '../components/shared/FormTextInput'
 import { authenticateMember } from '../data/memberlogin'
+import { saveMemberSession } from '../lib/memberSession'
 import { validateLogInForm } from '../utils/validateLogInForm'
 
 const initialFormValues = {
@@ -54,14 +56,7 @@ function LogInPage() {
       return
     }
 
-    localStorage.setItem('token', String(member.id))
-    localStorage.setItem('member', JSON.stringify({
-      id: member.id,
-      name: member.name,
-      username: member.username,
-      email: member.email,
-      role: member.role ?? 'member',
-    }))
+    saveMemberSession(member)
 
     navigate('/')
   }
@@ -81,7 +76,7 @@ function LogInPage() {
           </h1>
 
           <div className="mx-auto mt-8 flex w-full max-w-[490px] flex-col gap-3">
-            <FormField
+            <FormTextInput
               id="email"
               label="Email"
               name="email"
@@ -90,9 +85,10 @@ function LogInPage() {
               placeholder="Email"
               error={errors.email}
               onChange={handleInputChange}
+              variant="auth"
             />
 
-            <FormField
+            <FormTextInput
               id="password"
               label="Password"
               name="password"
@@ -101,6 +97,7 @@ function LogInPage() {
               placeholder="Password"
               error={errors.password}
               onChange={handleInputChange}
+              variant="auth"
             />
 
             <button
@@ -129,41 +126,6 @@ function LogInPage() {
         </form>
       </section>
     </main>
-  )
-}
-
-function FormField({
-  id,
-  label,
-  name,
-  type = 'text',
-  value,
-  placeholder,
-  error,
-  onChange,
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="mb-2 block text-sm font-medium text-[#75716b]">
-        {label}
-      </span>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={onChange}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className="h-10 w-full rounded-sm border border-[#dedbd6] bg-white px-3 text-sm font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#75716b] focus:border-[#28241f]"
-      />
-      {error && (
-        <p id={`${id}-error`} className="mt-2 text-xs font-semibold text-red-600">
-          {error}
-        </p>
-      )}
-    </label>
   )
 }
 

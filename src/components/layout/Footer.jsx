@@ -18,6 +18,8 @@ function Footer() {
               <a
                 key={label}
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={label}
                 title={label}
                 className="!text-black visited:!text-black transition-colors hover:!text-black focus:outline-none focus:ring-2 focus:ring-[#12b379]"

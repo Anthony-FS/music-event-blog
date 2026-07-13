@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import addIcon from '../assets/icons/Add_round_light.svg'
-import editIcon from '../assets/icons/Edit_light.svg'
-import trashIcon from '../assets/icons/Trash_light.svg'
-import api from '../lib/axios'
+import addIcon from '../../assets/icons/Add_round_light.svg'
+import editIcon from '../../assets/icons/Edit_light.svg'
+import trashIcon from '../../assets/icons/Trash_light.svg'
+import api from '../../lib/axios'
+import { adminPrimaryButtonClassName } from '../../lib/adminPageStyles'
 import ArticleManagementToolbar from './ArticleManagementToolbar'
 import CreateArticleForm from './CreateArticleForm'
-import DeleteArticleDialog from './DeleteArticleDialog'
+import ConfirmDialog from '../shared/ConfirmDialog'
+import {
+  AdminListPanel,
+  AdminPageContent,
+  AdminPageHeader,
+  AdminPageShell,
+} from '../shared/AdminPageShell'
 
 const POSTS_PER_PAGE = 30
 const STATUS_OPTIONS = ['Published', 'Draft']
@@ -145,20 +152,22 @@ function ArticleManagement() {
   }
 
   return (
-    <section className="flex h-screen min-h-0 min-w-0 flex-col overflow-hidden bg-[#f9f9f9]">
-      <header className="flex shrink-0 min-h-[88px] items-center justify-between border-b border-[#dedbd6] px-6 py-5 sm:px-10">
-        <h1 className="text-xl font-bold text-[#28241f]">Article management</h1>
-        <button
-          type="button"
-          onClick={() => setView('create')}
-          className="inline-flex! h-11 items-center justify-center gap-2 rounded-full! bg-[#28241f] px-6 text-sm font-semibold text-white transition-colors hover:bg-black"
-        >
-          <img src={addIcon} alt="" className="h-4 w-4 invert" aria-hidden="true" />
-          Create article
-        </button>
-      </header>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Article management"
+        actions={
+          <button
+            type="button"
+            onClick={() => setView('create')}
+            className={`${adminPrimaryButtonClassName} gap-2`}
+          >
+            <img src={addIcon} alt="" className="h-4 w-4 invert" aria-hidden="true" />
+            Create article
+          </button>
+        }
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col px-6 py-8 sm:px-10">
+      <AdminPageContent>
         <ArticleManagementToolbar
           categories={categories}
           searchValue={searchValue}
@@ -179,9 +188,9 @@ function ArticleManagement() {
             onDeleteArticle={handleDeleteArticle}
           />
         </div>
-      </div>
+      </AdminPageContent>
 
-      <DeleteArticleDialog
+      <ConfirmDialog
         open={deletingArticleId != null}
         onOpenChange={(open) => {
           if (!open) {
@@ -189,8 +198,11 @@ function ArticleManagement() {
           }
         }}
         onConfirm={handleConfirmDelete}
+        title="Delete article"
+        description="Do you want to delete this article?"
+        confirmLabel="Delete"
       />
-    </section>
+    </AdminPageShell>
   )
 }
 
@@ -201,37 +213,14 @@ function ArticleManagementTable({
   onEditArticle,
   onDeleteArticle,
 }) {
-  const listWindowClassName =
-    'min-h-0 flex-1 overflow-y-auto rounded-lg border border-[#dedbd6] bg-white'
-  const messageClassName =
-    'px-6 py-8 text-center text-sm font-semibold text-[#75716b]'
-
-  if (isLoading) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>Loading articles...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>{error}</p>
-      </div>
-    )
-  }
-
-  if (articles.length === 0) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>No articles found.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className={listWindowClassName}>
+    <AdminListPanel
+      isLoading={isLoading}
+      error={error}
+      isEmpty={articles.length === 0}
+      loadingMessage="Loading articles..."
+      emptyMessage="No articles found."
+    >
       <div className="sticky top-0 z-10 hidden grid-cols-[minmax(0,1fr)_140px_140px_96px] items-center gap-4 border-b border-[#dedbd6] bg-white px-6 py-4 text-sm font-semibold text-[#75716b] md:grid">
         <span className="min-w-0">Article title</span>
         <span>Category</span>
@@ -275,7 +264,7 @@ function ArticleManagementTable({
           </div>
         </div>
       ))}
-    </div>
+    </AdminListPanel>
   )
 }
 

@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import addIcon from '../assets/icons/Add_round_light.svg'
-import editIcon from '../assets/icons/Edit_light.svg'
-import trashIcon from '../assets/icons/Trash_light.svg'
-import api from '../lib/axios'
+import addIcon from '../../assets/icons/Add_round_light.svg'
+import editIcon from '../../assets/icons/Edit_light.svg'
+import trashIcon from '../../assets/icons/Trash_light.svg'
+import api from '../../lib/axios'
+import { adminPrimaryButtonClassName } from '../../lib/adminPageStyles'
 import CategoryManagementToolbar from './CategoryManagementToolbar'
 import CreateCategoryForm from './CreateCategoryForm'
-import DeleteCategoryDialog from './DeleteCategoryDialog'
+import ConfirmDialog from '../shared/ConfirmDialog'
+import {
+  AdminListPanel,
+  AdminPageContent,
+  AdminPageHeader,
+  AdminPageShell,
+} from '../shared/AdminPageShell'
 
 function CategoryManagement() {
   const [view, setView] = useState('list')
@@ -105,20 +112,22 @@ function CategoryManagement() {
   }
 
   return (
-    <section className="flex h-screen min-h-0 min-w-0 flex-col overflow-hidden bg-[#f9f9f9]">
-      <header className="flex shrink-0 min-h-[88px] items-center justify-between border-b border-[#dedbd6] px-6 py-5 sm:px-10">
-        <h1 className="text-xl font-bold text-[#28241f]">Category management</h1>
-        <button
-          type="button"
-          onClick={() => setView('create')}
-          className="inline-flex! h-11 items-center justify-center gap-2 rounded-full! bg-[#28241f] px-6 text-sm font-semibold text-white transition-colors hover:bg-black"
-        >
-          <img src={addIcon} alt="" className="h-4 w-4 invert" aria-hidden="true" />
-          Create category
-        </button>
-      </header>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Category management"
+        actions={
+          <button
+            type="button"
+            onClick={() => setView('create')}
+            className={`${adminPrimaryButtonClassName} gap-2`}
+          >
+            <img src={addIcon} alt="" className="h-4 w-4 invert" aria-hidden="true" />
+            Create category
+          </button>
+        }
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col px-6 py-8 sm:px-10">
+      <AdminPageContent>
         <CategoryManagementToolbar
           searchValue={searchValue}
           onSearchChange={setSearchValue}
@@ -132,9 +141,9 @@ function CategoryManagement() {
             onDeleteCategory={setDeletingCategory}
           />
         </div>
-      </div>
+      </AdminPageContent>
 
-      <DeleteCategoryDialog
+      <ConfirmDialog
         open={deletingCategory != null}
         onOpenChange={(open) => {
           if (!open) {
@@ -142,8 +151,11 @@ function CategoryManagement() {
           }
         }}
         onConfirm={handleConfirmDelete}
+        title="Delete category"
+        description="Do you want to delete this category?"
+        confirmLabel="Delete"
       />
-    </section>
+    </AdminPageShell>
   )
 }
 
@@ -154,37 +166,14 @@ function CategoryManagementTable({
   onEditCategory,
   onDeleteCategory,
 }) {
-  const listWindowClassName =
-    'min-h-0 flex-1 overflow-y-auto rounded-lg border border-[#dedbd6] bg-white'
-  const messageClassName =
-    'px-6 py-8 text-center text-sm font-semibold text-[#75716b]'
-
-  if (isLoading) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>Loading categories...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>{error}</p>
-      </div>
-    )
-  }
-
-  if (categories.length === 0) {
-    return (
-      <div className={listWindowClassName}>
-        <p className={messageClassName}>No categories found.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className={listWindowClassName}>
+    <AdminListPanel
+      isLoading={isLoading}
+      error={error}
+      isEmpty={categories.length === 0}
+      loadingMessage="Loading categories..."
+      emptyMessage="No categories found."
+    >
       <div className="sticky top-0 z-10 hidden grid-cols-[minmax(0,1fr)_96px] gap-4 border-b border-[#dedbd6] bg-white px-6 py-4 text-sm font-semibold text-[#75716b] md:grid">
         <span>Category</span>
         <span className="sr-only">Actions</span>
@@ -216,7 +205,7 @@ function CategoryManagementTable({
           </div>
         </div>
       ))}
-    </div>
+    </AdminListPanel>
   )
 }
 

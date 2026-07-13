@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import expandDownIcon from '../assets/icons/Expand_down_light.svg'
-import fileIcon from '../assets/icons/File_light.svg'
-import logo from '../assets/icons/logo.svg'
-import outIcon from '../assets/icons/Out_light.svg'
-import refreshIcon from '../assets/icons/Refresh_light.svg'
-import sandwichMenu from '../assets/icons/Sandwich_menu.svg'
-import userIcon from '../assets/icons/User_duotone.svg'
-import NotificationMenu from './NotificationMenu'
+import expandDownIcon from '../../assets/icons/Expand_down_light.svg'
+import fileIcon from '../../assets/icons/File_light.svg'
+import logo from '../../assets/icons/logo.svg'
+import outIcon from '../../assets/icons/Out_light.svg'
+import refreshIcon from '../../assets/icons/Refresh_light.svg'
+import sandwichMenu from '../../assets/icons/Sandwich_menu.svg'
+import userIcon from '../../assets/icons/User_duotone.svg'
+import NotificationMenu from '../admin/NotificationMenu'
+import useMember from '../../hooks/useMember'
 
 const authLinks = [
   {
@@ -22,20 +23,6 @@ const authLinks = [
     variant: 'primary',
   },
 ]
-
-function getStoredMember() {
-  const token = localStorage.getItem('token')
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    return JSON.parse(localStorage.getItem('member')) ?? null
-  } catch {
-    return null
-  }
-}
 
 function NavLogo() {
   return (
@@ -229,23 +216,7 @@ function MobileNavMenu({ isOpen, onLinkClick }) {
 
 function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [member, setMember] = useState(getStoredMember)
-  const isLoggedIn = Boolean(member)
-
-  useEffect(() => {
-    function handleMemberProfileUpdate() {
-      setMember(getStoredMember())
-    }
-
-    window.addEventListener('member-profile-updated', handleMemberProfileUpdate)
-
-    return () => {
-      window.removeEventListener(
-        'member-profile-updated',
-        handleMemberProfileUpdate,
-      )
-    }
-  }, [])
+  const { member, isLoggedIn, logOut } = useMember()
 
   function handleMobileMenuToggle() {
     setIsMobileMenuOpen((currentValue) => !currentValue)
@@ -253,12 +224,6 @@ function NavBar() {
 
   function handleMobileMenuClose() {
     setIsMobileMenuOpen(false)
-  }
-
-  function handleLogOut() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('member')
-    setMember(null)
   }
 
   return (
@@ -269,7 +234,7 @@ function NavBar() {
       >
         <NavLogo />
         {isLoggedIn ? (
-          <MemberActions member={member} onLogOut={handleLogOut} />
+          <MemberActions member={member} onLogOut={logOut} />
         ) : (
           <>
             <NavActions />

@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 
-import bellIcon from '../assets/icons/Bell_light.svg'
-import fileIcon from '../assets/icons/File_light.svg'
-import folderIcon from '../assets/icons/Img_box_light.svg'
-import refreshIcon from '../assets/icons/Refresh_light.svg'
-import userIcon from '../assets/icons/User_duotone.svg'
+import bellIcon from '../../assets/icons/Bell_light.svg'
+import fileIcon from '../../assets/icons/File_light.svg'
+import folderIcon from '../../assets/icons/Img_box_light.svg'
+import refreshIcon from '../../assets/icons/Refresh_light.svg'
+import userIcon from '../../assets/icons/User_duotone.svg'
 
 const adminLinks = [
   {

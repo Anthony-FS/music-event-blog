@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-import AuthRequiredDialog from './AuthRequiredDialog'
+import AuthRequiredDialog from '../shared/AuthRequiredDialog'
+import { isLoggedIn } from '../../lib/memberSession'
 
 const comments = [
   {
@@ -30,7 +31,7 @@ function CommentSection() {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 
   function requireAuth(event) {
-    if (!localStorage.getItem('token')) {
+    if (!isLoggedIn()) {
       event?.preventDefault()
       setIsAuthDialogOpen(true)
       return false

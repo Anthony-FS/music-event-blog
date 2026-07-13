@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import FormField from '../FormField'
+import {
+  AdminPageContent,
+  AdminPageHeader,
+  AdminPageShell,
+} from '../AdminPageShell'
+import { adminInputClassName, adminTextareaClassName } from '../../../lib/formStyles'
+import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
+import { updateStoredMember } from '../../../lib/memberSession'
+
 const defaultAvatarUrl = '/images/myphoto.jpg'
 const defaultBio =
   'I am a pet enthusiast and freelance writer who specializes in animal behavior and care.'
-
-const inputClassName =
-  'h-11 w-full max-w-sm rounded-sm border border-[#dedbd6] bg-white px-4 text-sm font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#75716b] focus:border-[#28241f]'
 
 function ProfileManagement({ member, onSave }) {
   const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl ?? defaultAvatarUrl)
@@ -58,33 +65,35 @@ function ProfileManagement({ member, onSave }) {
       avatarUrl,
     }
 
-    localStorage.setItem('member', JSON.stringify(nextMember))
-    window.dispatchEvent(new Event('member-profile-updated'))
+    updateStoredMember(nextMember)
     onSave?.(nextMember)
     toast.success('Profile updated.')
   }
 
   return (
-    <section className="min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
-      <header className="flex min-h-[88px] items-center justify-between gap-4 border-b border-[#dedbd6] px-8 py-5 sm:px-16">
-        <h1 className="text-xl font-bold text-[#28241f]">Profile</h1>
-        <button
-          type="button"
-          onClick={handleSave}
-          className="inline-flex! h-11 items-center justify-center rounded-full! bg-[#28241f] px-6 text-sm font-semibold text-white transition-colors hover:bg-black"
-        >
-          Save
-        </button>
-      </header>
+    <AdminPageShell variant="form">
+      <AdminPageHeader
+        variant="form"
+        title="Profile"
+        actions={
+          <button
+            type="button"
+            onClick={handleSave}
+            className={adminPrimaryButtonClassName}
+          >
+            Save
+          </button>
+        }
+      />
 
-      <form
-        id="profile-form"
-        className="px-8 py-10 sm:px-16"
-        onSubmit={(event) => {
-          event.preventDefault()
-          handleSave()
-        }}
-      >
+      <AdminPageContent variant="form">
+        <form
+          id="profile-form"
+          onSubmit={(event) => {
+            event.preventDefault()
+            handleSave()
+          }}
+        >
         <div className="flex w-full max-w-3xl flex-col gap-8">
           <FormField label="Profile picture">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -111,7 +120,7 @@ function ProfileManagement({ member, onSave }) {
               value={formValues.name}
               onChange={handleInputChange}
               placeholder="Thompson P."
-              className={inputClassName}
+              className={adminInputClassName}
             />
           </FormField>
 
@@ -121,7 +130,7 @@ function ProfileManagement({ member, onSave }) {
               value={formValues.username}
               onChange={handleInputChange}
               placeholder="thompson"
-              className={inputClassName}
+              className={adminInputClassName}
             />
           </FormField>
 
@@ -132,7 +141,7 @@ function ProfileManagement({ member, onSave }) {
               value={formValues.email}
               onChange={handleInputChange}
               placeholder="thompson.p@gmail.com"
-              className={inputClassName}
+              className={adminInputClassName}
             />
           </FormField>
 
@@ -144,21 +153,13 @@ function ProfileManagement({ member, onSave }) {
               maxLength={120}
               rows={5}
               placeholder="Bio"
-              className="w-full max-w-3xl resize-y rounded-sm border border-[#dedbd6] bg-white px-4 py-3 text-sm font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#75716b] focus:border-[#28241f]"
+              className={`${adminTextareaClassName} max-w-3xl`}
             />
           </FormField>
         </div>
-      </form>
-    </section>
-  )
-}
-
-function FormField({ label, children }) {
-  return (
-    <div>
-      <p className="mb-2 text-sm font-medium text-[#75716b]">{label}</p>
-      {children}
-    </div>
+        </form>
+      </AdminPageContent>
+    </AdminPageShell>
   )
 }
 

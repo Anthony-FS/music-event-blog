@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Copy, Smile } from 'lucide-react'
 import { toast } from 'sonner'
 
-import facebookIcon from '../assets/icons/Facebook_black.svg'
-import linkedInIcon from '../assets/icons/LinkedIN_black.svg'
-import twitterIcon from '../assets/icons/Twitter_black.svg'
-import AuthRequiredDialog from './AuthRequiredDialog'
+import facebookIcon from '../../assets/icons/Facebook_black.svg'
+import linkedInIcon from '../../assets/icons/LinkedIN_black.svg'
+import twitterIcon from '../../assets/icons/Twitter_black.svg'
+import AuthRequiredDialog from '../shared/AuthRequiredDialog'
+import { isLoggedIn } from '../../lib/memberSession'
 
 const socialLinks = [
   { label: 'Facebook', icon: facebookIcon, bg: 'bg-[#1877f2]' },
@@ -29,7 +30,7 @@ function SocialBar({ likes = 0 }) {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 
   function requireAuth() {
-    if (!localStorage.getItem('token')) {
+    if (!isLoggedIn()) {
       setIsAuthDialogOpen(true)
       return false
     }

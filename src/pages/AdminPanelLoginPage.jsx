@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import ArticleManagement from '../components/ArticleManagement'
-import AdminControlPanel from '../components/AdminControlPanel'
-import CategoryManagement from '../components/CategoryManagement'
-import NotificationManagement from '../components/NotificationManagement'
-import ProfileManagement from '../components/ProfileManagement'
-import ResetPasswordManagement from '../components/ResetPasswordManagement'
-import NavBar from '../components/NavBar'
+import ArticleManagement from '../components/admin/ArticleManagement'
+import AdminControlPanel from '../components/admin/AdminControlPanel'
+import CategoryManagement from '../components/admin/CategoryManagement'
+import NotificationManagement from '../components/admin/NotificationManagement'
+import ProfileManagement from '../components/shared/account/ProfileManagement'
+import ResetPasswordManagement from '../components/shared/account/ResetPasswordManagement'
+import NavBar from '../components/layout/NavBar'
 import { authenticateMember } from '../data/memberlogin'
 
 const initialFormValues = {

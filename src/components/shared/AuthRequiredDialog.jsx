@@ -6,7 +6,7 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-} from './ui/alert-dialog'
+} from '../ui/alert-dialog'
 
 function AuthRequiredDialog({ open, onOpenChange }) {
   return (

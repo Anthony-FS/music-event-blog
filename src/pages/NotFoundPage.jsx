@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
-import Footer from '../components/Footer'
-import NavBar from '../components/NavBar'
+import Footer from '../components/layout/Footer'
+import NavBar from '../components/layout/NavBar'
 
 function NotFoundPage() {
   return (
