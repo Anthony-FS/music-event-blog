@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import expandDownIcon from '../assets/icons/Expand_down_light.svg'
 import imgBoxIcon from '../assets/icons/Img_box_light.svg'
-import { categories } from '../data/blogPosts'
+import trashIcon from '../assets/icons/Trash_light.svg'
+import { categories as defaultCategories } from '../data/blogPosts'
+import api from '../lib/axios'
+import DeleteArticleDialog from './DeleteArticleDialog'
 
 const initialFormValues = {
   category: '',
@@ -16,11 +19,46 @@ const initialFormValues = {
 const inputClassName =
   'h-11 w-full rounded-sm border border-[#dedbd6] bg-white px-4 text-sm font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#75716b] focus:border-[#28241f]'
 
-function CreateArticleForm({ onClose }) {
+function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
+  const isEditMode = articleId != null
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [formValues, setFormValues] = useState(initialFormValues)
+  const [isLoadingArticle, setIsLoadingArticle] = useState(isEditMode)
+  const [loadError, setLoadError] = useState(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  const categoryOptions = categories.filter((category) => category !== 'All')
+  const categoryOptions = buildCategoryOptions(categories, formValues.category)
+
+  useEffect(() => {
+    if (!isEditMode) {
+      return
+    }
+
+    async function fetchArticle() {
+      try {
+        setIsLoadingArticle(true)
+        setLoadError(null)
+
+        const { data } = await api.get(`/posts/${articleId}`)
+        const article = data.post ?? data
+
+        setThumbnailUrl(article.image ?? '')
+        setFormValues({
+          category: article.category ?? '',
+          authorName: article.author ?? 'Thompson P.',
+          title: article.title ?? '',
+          introduction: article.description ?? '',
+          content: article.content ?? '',
+        })
+      } catch {
+        setLoadError('Failed to load article. Please try again later.')
+      } finally {
+        setIsLoadingArticle(false)
+      }
+    }
+
+    fetchArticle()
+  }, [articleId, isEditMode])
 
   function handleInputChange(event) {
     const { name, value } = event.target
@@ -70,10 +108,51 @@ function CreateArticleForm({ onClose }) {
     onClose()
   }
 
+  function handleConfirmDelete() {
+    setIsDeleteDialogOpen(false)
+    toast.success('Article deleted.')
+    onClose()
+  }
+
+  if (isLoadingArticle) {
+    return (
+      <section className="min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
+        <header className="flex min-h-[88px] items-center border-b border-[#dedbd6] px-8 py-5 sm:px-16">
+          <h1 className="text-xl font-bold text-[#28241f]">Edit article</h1>
+        </header>
+        <p className="px-8 py-10 text-sm font-semibold text-[#75716b] sm:px-16">
+          Loading article...
+        </p>
+      </section>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <section className="min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
+        <header className="flex min-h-[88px] items-center justify-between gap-4 border-b border-[#dedbd6] px-8 py-5 sm:px-16">
+          <h1 className="text-xl font-bold text-[#28241f]">Edit article</h1>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex! h-11 items-center justify-center rounded-full! border border-[#28241f] bg-white px-6 text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8]"
+          >
+            Back to list
+          </button>
+        </header>
+        <p className="px-8 py-10 text-sm font-semibold text-[#75716b] sm:px-16">
+          {loadError}
+        </p>
+      </section>
+    )
+  }
+
   return (
     <section className="min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
       <header className="flex min-h-[88px] items-center justify-between gap-4 border-b border-[#dedbd6] px-8 py-5 sm:px-16">
-        <h1 className="text-xl font-bold text-[#28241f]">Create article</h1>
+        <h1 className="text-xl font-bold text-[#28241f]">
+          {isEditMode ? 'Edit article' : 'Create article'}
+        </h1>
 
         <div className="flex shrink-0 items-center gap-3">
           <button
@@ -88,7 +167,7 @@ function CreateArticleForm({ onClose }) {
             onClick={() => handleSave('published')}
             className="inline-flex! h-11 items-center justify-center rounded-full! bg-[#28241f] px-6 text-sm font-semibold text-white transition-colors hover:bg-black"
           >
-            Save and publish
+            {isEditMode ? 'Save' : 'Save and publish'}
           </button>
         </div>
       </header>
@@ -195,10 +274,44 @@ function CreateArticleForm({ onClose }) {
               className="min-h-[320px] w-full resize-y rounded-sm border border-[#dedbd6] bg-white px-4 py-3 text-sm font-medium text-[#28241f] outline-none transition-colors placeholder:text-[#75716b] focus:border-[#28241f]"
             />
           </FormField>
+
+          {isEditMode && (
+            <div className="border-t border-[#dedbd6] pt-8">
+              <button
+                type="button"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="inline-flex! items-center gap-2 text-sm font-semibold text-[#28241f] transition-colors hover:text-black"
+              >
+                <img src={trashIcon} alt="" className="h-4 w-4" aria-hidden="true" />
+                Delete article
+              </button>
+            </div>
+          )}
         </div>
       </form>
+
+      {isEditMode && (
+        <DeleteArticleDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </section>
   )
+}
+
+function buildCategoryOptions(categories, selectedCategory) {
+  const baseCategories =
+    categories.length > 0
+      ? categories
+      : defaultCategories.filter((category) => category !== 'All')
+
+  if (selectedCategory && !baseCategories.includes(selectedCategory)) {
+    return [...baseCategories, selectedCategory]
+  }
+
+  return baseCategories
 }
 
 function FormField({ label, children }) {

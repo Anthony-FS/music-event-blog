@@ -19,7 +19,7 @@ const adminLinks = [
 
 function AdminControlPanel({ activeView, onViewChange, onLogOut }) {
   return (
-    <aside className="flex min-h-screen w-[260px] shrink-0 flex-col bg-[#f0f0f0]">
+    <aside className="flex min-h-screen w-[300px] shrink-0 flex-col bg-[#f0f0f0]">
       <div className="px-6 py-8">
         <Link to="/" aria-label="Home" className="inline-flex items-center">
           <img src={logo} alt="hh." className="h-10 w-10" />
@@ -80,7 +80,7 @@ function AdminSideButton({ icon, label, isActive = false, onClick }) {
       }`}
     >
       <img src={icon} alt="" className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>{label}</span>
+      <span className="whitespace-nowrap">{label}</span>
     </button>
   )
 }

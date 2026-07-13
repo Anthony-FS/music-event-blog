@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import addIcon from '../assets/icons/Add_round_light.svg'
 import editIcon from '../assets/icons/Edit_light.svg'
@@ -6,6 +7,7 @@ import trashIcon from '../assets/icons/Trash_light.svg'
 import api from '../lib/axios'
 import ArticleManagementToolbar from './ArticleManagementToolbar'
 import CreateArticleForm from './CreateArticleForm'
+import DeleteArticleDialog from './DeleteArticleDialog'
 
 const POSTS_PER_PAGE = 30
 const STATUS_OPTIONS = ['Published', 'Draft']
@@ -16,6 +18,7 @@ function getArticleStatus(article) {
 
 function ArticleManagement() {
   const [view, setView] = useState('list')
+  const [editingArticleId, setEditingArticleId] = useState(null)
   const [articles, setArticles] = useState([])
   const [categories, setCategories] = useState([])
   const [searchValue, setSearchValue] = useState('')
@@ -23,6 +26,7 @@ function ArticleManagement() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [deletingArticleId, setDeletingArticleId] = useState(null)
 
   useEffect(() => {
     if (view !== 'list') {
@@ -102,8 +106,42 @@ function ArticleManagement() {
       )
     : []
 
+  function handleCloseForm() {
+    setView('list')
+    setEditingArticleId(null)
+  }
+
+  function handleEditArticle(articleId) {
+    setEditingArticleId(articleId)
+    setView('edit')
+  }
+
+  function handleDeleteArticle(articleId) {
+    setDeletingArticleId(articleId)
+  }
+
+  function handleConfirmDelete() {
+    setArticles((currentArticles) =>
+      currentArticles.filter((article) => article.id !== deletingArticleId),
+    )
+    setDeletingArticleId(null)
+    toast.success('Article deleted.')
+  }
+
   if (view === 'create') {
-    return <CreateArticleForm onClose={() => setView('list')} />
+    return (
+      <CreateArticleForm categories={categories} onClose={handleCloseForm} />
+    )
+  }
+
+  if (view === 'edit') {
+    return (
+      <CreateArticleForm
+        articleId={editingArticleId}
+        categories={categories}
+        onClose={handleCloseForm}
+      />
+    )
   }
 
   return (
@@ -137,14 +175,32 @@ function ArticleManagement() {
             articles={articles}
             isLoading={isLoading}
             error={error}
+            onEditArticle={handleEditArticle}
+            onDeleteArticle={handleDeleteArticle}
           />
         </div>
       </div>
+
+      <DeleteArticleDialog
+        open={deletingArticleId != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingArticleId(null)
+          }
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </section>
   )
 }
 
-function ArticleManagementTable({ articles, isLoading, error }) {
+function ArticleManagementTable({
+  articles,
+  isLoading,
+  error,
+  onEditArticle,
+  onDeleteArticle,
+}) {
   const listWindowClassName =
     'min-h-0 flex-1 overflow-y-auto rounded-lg border border-[#dedbd6] bg-white'
   const messageClassName =
@@ -202,10 +258,18 @@ function ArticleManagementTable({ articles, isLoading, error }) {
             • {getArticleStatus(article) === 'draft' ? 'Draft' : 'Published'}
           </p>
           <div className="flex items-center gap-4 md:justify-end">
-            <button type="button" aria-label={`Edit ${article.title}`}>
+            <button
+              type="button"
+              aria-label={`Edit ${article.title}`}
+              onClick={() => onEditArticle(article.id)}
+            >
               <img src={editIcon} alt="" className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label={`Delete ${article.title}`}>
+            <button
+              type="button"
+              aria-label={`Delete ${article.title}`}
+              onClick={() => onDeleteArticle(article.id)}
+            >
               <img src={trashIcon} alt="" className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
