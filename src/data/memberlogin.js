@@ -5,6 +5,7 @@ export const members = [
     username: 'anthonyfs',
     email: 'anthony@example.com',
     password: 'password123',
+    role: 'member',
   },
   {
     id: 2,
@@ -12,6 +13,15 @@ export const members = [
     username: 'thompsonp',
     email: 'thompson@example.com',
     password: 'password123',
+    role: 'member',
+  },
+  {
+    id: 3,
+    name: 'Admin',
+    username: 'admin',
+    email: 'admin@example.com',
+    password: 'admin123',
+    role: 'admin',
   },
 ]
 

@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import bellIcon from '../assets/icons/Bell_light.svg'
 import expandDownIcon from '../assets/icons/Expand_down_light.svg'
+import fileIcon from '../assets/icons/File_light.svg'
 import logo from '../assets/icons/logo.svg'
 import outIcon from '../assets/icons/Out_light.svg'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
 import sandwichMenu from '../assets/icons/Sandwich_menu.svg'
 import userIcon from '../assets/icons/User_duotone.svg'
+import NotificationMenu from './NotificationMenu'
 
 const authLinks = [
   {
@@ -73,10 +74,18 @@ function NavActions() {
 
 function MemberActions({ member, onLogOut }) {
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
+  const isAdmin = member?.role === 'admin' || member?.name === 'Admin'
+
+  function handleNotificationMenuToggle() {
+    setIsNotificationMenuOpen((currentValue) => !currentValue)
+    setIsMemberMenuOpen(false)
+  }
 
   function handleMemberMenuToggle(event) {
     event.preventDefault()
     setIsMemberMenuOpen((currentValue) => !currentValue)
+    setIsNotificationMenuOpen(false)
   }
 
   function handleLogOutClick() {
@@ -86,13 +95,10 @@ function MemberActions({ member, onLogOut }) {
 
   return (
     <div className="relative flex shrink-0 items-center gap-3">
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full! border border-[#dedbd6] bg-white transition-colors hover:bg-[#eeece8]!"
-      >
-        <img src={bellIcon} alt="" className="h-4 w-4" aria-hidden="true" />
-      </button>
+      <NotificationMenu
+        isOpen={isNotificationMenuOpen}
+        onToggle={handleNotificationMenuToggle}
+      />
 
       <div className="relative flex h-9 items-center">
         <button
@@ -104,7 +110,7 @@ function MemberActions({ member, onLogOut }) {
           onClick={handleMemberMenuToggle}
         >
           <img
-            src="/images/myphoto.jpg"
+            src={member?.avatarUrl ?? '/images/myphoto.jpg'}
             alt=""
             className="h-8 w-8 rounded-full object-cover"
           />
@@ -124,8 +130,26 @@ function MemberActions({ member, onLogOut }) {
             id="member-menu"
             className="absolute right-0 top-[calc(100%+0.75rem)] z-50 flex w-[230px] flex-col items-stretch overflow-hidden rounded-lg border border-[#dedbd6] bg-white py-2 text-left shadow-lg"
           >
-            <MemberMenuItem icon={userIcon} label="Profile" />
-            <MemberMenuItem icon={refreshIcon} label="Reset password" />
+            <MemberMenuItem
+              icon={userIcon}
+              label="Profile"
+              href="/member-management"
+              onClick={() => setIsMemberMenuOpen(false)}
+            />
+            <MemberMenuItem
+              icon={refreshIcon}
+              label="Reset password"
+              href="/member-management/reset-password"
+              onClick={() => setIsMemberMenuOpen(false)}
+            />
+            {isAdmin && (
+              <MemberMenuItem
+                icon={fileIcon}
+                label="Admin panel"
+                href="/admin"
+                onClick={() => setIsMemberMenuOpen(false)}
+              />
+            )}
             <div className="my-1 h-px bg-[#dedbd6]" />
             <MemberMenuItem
               icon={outIcon}
@@ -139,15 +163,27 @@ function MemberActions({ member, onLogOut }) {
   )
 }
 
-function MemberMenuItem({ icon, label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex! w-full items-center justify-start! gap-4 px-4 py-3 text-left! text-base font-semibold whitespace-nowrap text-[#43403b] transition-colors hover:bg-[#f6f5f2]"
-    >
+function MemberMenuItem({ icon, label, href, onClick }) {
+  const className =
+    'flex! w-full items-center justify-start! gap-4 px-4 py-3 text-left! text-base font-semibold whitespace-nowrap text-[#43403b]! no-underline! transition-colors visited:text-[#43403b]! hover:bg-[#f6f5f2] hover:text-[#43403b]!'
+  const content = (
+    <>
       <img src={icon} alt="" className="h-5 w-5" aria-hidden="true" />
       <span>{label}</span>
+    </>
+  )
+
+  if (href) {
+    return (
+      <Link to={href} onClick={onClick} className={className}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
     </button>
   )
 }
@@ -195,6 +231,21 @@ function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [member, setMember] = useState(getStoredMember)
   const isLoggedIn = Boolean(member)
+
+  useEffect(() => {
+    function handleMemberProfileUpdate() {
+      setMember(getStoredMember())
+    }
+
+    window.addEventListener('member-profile-updated', handleMemberProfileUpdate)
+
+    return () => {
+      window.removeEventListener(
+        'member-profile-updated',
+        handleMemberProfileUpdate,
+      )
+    }
+  }, [])
 
   function handleMobileMenuToggle() {
     setIsMobileMenuOpen((currentValue) => !currentValue)
