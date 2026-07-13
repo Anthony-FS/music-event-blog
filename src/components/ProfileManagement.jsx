@@ -71,7 +71,7 @@ function ProfileManagement({ member, onSave }) {
   }
 
   return (
-    <section>
+    <section className="min-h-screen min-w-0 bg-[#f9f9f9] px-6 py-8 sm:px-10">
       <h1 className="text-2xl font-bold text-[#28241f]">Profile</h1>
 
       <form
