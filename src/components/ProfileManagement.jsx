@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+const defaultAvatarUrl = '/images/myphoto.jpg'
+
 function ProfileManagement({ member, onSave }) {
+  const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl ?? defaultAvatarUrl)
   const [formValues, setFormValues] = useState({
     name: member.name ?? 'Anthony FS.',
     username: member.username ?? 'anthonyfs',
@@ -17,6 +20,39 @@ function ProfileManagement({ member, onSave }) {
     }))
   }
 
+  function handleProfilePictureChange(event) {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file.')
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const nextAvatarUrl = String(reader.result)
+      const nextMember = {
+        ...member,
+        ...formValues,
+        avatarUrl: nextAvatarUrl,
+      }
+
+      setAvatarUrl(nextAvatarUrl)
+      localStorage.setItem('member', JSON.stringify(nextMember))
+      window.dispatchEvent(new Event('member-profile-updated'))
+      onSave?.(nextMember)
+      toast.success('Profile picture updated.')
+    }
+
+    reader.readAsDataURL(file)
+    event.target.value = ''
+  }
+
   function handleSubmit(event) {
     event.preventDefault()
 
@@ -25,9 +61,11 @@ function ProfileManagement({ member, onSave }) {
       name: formValues.name,
       username: formValues.username,
       email: formValues.email,
+      avatarUrl,
     }
 
     localStorage.setItem('member', JSON.stringify(nextMember))
+    window.dispatchEvent(new Event('member-profile-updated'))
     onSave?.(nextMember)
     toast.success('Profile updated.')
   }
@@ -42,16 +80,19 @@ function ProfileManagement({ member, onSave }) {
       >
         <div className="flex flex-col gap-5 border-b border-[#dedbd6] pb-8 sm:flex-row sm:items-center">
           <img
-            src="/images/myphoto.jpg"
+            src={avatarUrl}
             alt=""
             className="h-28 w-28 rounded-full object-cover"
           />
-          <button
-            type="button"
-            className="h-10 w-fit rounded-full! border border-[#28241f] bg-white px-8 text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#eeece8]"
-          >
-            Upload profile picture
-          </button>
+          <label className="inline-flex! h-10 w-fit cursor-pointer items-center justify-center rounded-full! border border-[#28241f] bg-white px-8 py-0 text-sm font-semibold leading-none text-[#28241f] transition-colors hover:bg-[#eeece8]">
+            <span className="text-center leading-none">Upload profile picture</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleProfilePictureChange}
+            />
+          </label>
         </div>
 
         <div className="mt-8 w-full space-y-5">

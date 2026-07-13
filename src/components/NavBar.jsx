@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import bellIcon from '../assets/icons/Bell_light.svg'
 import expandDownIcon from '../assets/icons/Expand_down_light.svg'
 import fileIcon from '../assets/icons/File_light.svg'
 import logo from '../assets/icons/logo.svg'
@@ -9,6 +8,7 @@ import outIcon from '../assets/icons/Out_light.svg'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
 import sandwichMenu from '../assets/icons/Sandwich_menu.svg'
 import userIcon from '../assets/icons/User_duotone.svg'
+import NotificationMenu from './NotificationMenu'
 
 const authLinks = [
   {
@@ -74,11 +74,18 @@ function NavActions() {
 
 function MemberActions({ member, onLogOut }) {
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
   const isAdmin = member?.role === 'admin' || member?.name === 'Admin'
+
+  function handleNotificationMenuToggle() {
+    setIsNotificationMenuOpen((currentValue) => !currentValue)
+    setIsMemberMenuOpen(false)
+  }
 
   function handleMemberMenuToggle(event) {
     event.preventDefault()
     setIsMemberMenuOpen((currentValue) => !currentValue)
+    setIsNotificationMenuOpen(false)
   }
 
   function handleLogOutClick() {
@@ -88,13 +95,10 @@ function MemberActions({ member, onLogOut }) {
 
   return (
     <div className="relative flex shrink-0 items-center gap-3">
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full! border border-[#dedbd6] bg-white transition-colors hover:bg-[#eeece8]!"
-      >
-        <img src={bellIcon} alt="" className="h-4 w-4" aria-hidden="true" />
-      </button>
+      <NotificationMenu
+        isOpen={isNotificationMenuOpen}
+        onToggle={handleNotificationMenuToggle}
+      />
 
       <div className="relative flex h-9 items-center">
         <button
@@ -106,7 +110,7 @@ function MemberActions({ member, onLogOut }) {
           onClick={handleMemberMenuToggle}
         >
           <img
-            src="/images/myphoto.jpg"
+            src={member?.avatarUrl ?? '/images/myphoto.jpg'}
             alt=""
             className="h-8 w-8 rounded-full object-cover"
           />
@@ -227,6 +231,21 @@ function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [member, setMember] = useState(getStoredMember)
   const isLoggedIn = Boolean(member)
+
+  useEffect(() => {
+    function handleMemberProfileUpdate() {
+      setMember(getStoredMember())
+    }
+
+    window.addEventListener('member-profile-updated', handleMemberProfileUpdate)
+
+    return () => {
+      window.removeEventListener(
+        'member-profile-updated',
+        handleMemberProfileUpdate,
+      )
+    }
+  }, [])
 
   function handleMobileMenuToggle() {
     setIsMobileMenuOpen((currentValue) => !currentValue)

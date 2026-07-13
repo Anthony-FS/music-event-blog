@@ -26,7 +26,11 @@ function MemberManagementPage() {
       <NavBar />
 
       <section className="mx-auto grid w-full max-w-5xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:py-14">
-        <MembersControlPanel memberName={member.name} activeView={activeView} />
+        <MembersControlPanel
+          memberName={member.name}
+          avatarUrl={member.avatarUrl}
+          activeView={activeView}
+        />
         {activeView === 'reset-password' ? (
           <ResetPasswordManagement />
         ) : (

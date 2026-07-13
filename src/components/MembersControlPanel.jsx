@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
 import userIcon from '../assets/icons/User_duotone.svg'
 
-function MembersControlPanel({ memberName, activeView }) {
+function MembersControlPanel({ memberName, avatarUrl, activeView }) {
   return (
     <aside className="space-y-8">
       <div className="flex items-center gap-4">
         <img
-          src="/images/myphoto.jpg"
+          src={avatarUrl ?? '/images/myphoto.jpg'}
           alt=""
           className="h-16 w-16 rounded-full object-cover"
         />
