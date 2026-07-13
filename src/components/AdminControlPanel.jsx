@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
 
 import bellIcon from '../assets/icons/Bell_light.svg'
-import expandRightIcon from '../assets/icons/Expand_right_light.svg'
 import fileIcon from '../assets/icons/File_light.svg'
 import folderIcon from '../assets/icons/Img_box_light.svg'
 import logo from '../assets/icons/logo.svg'
-import outIcon from '../assets/icons/Out_light.svg'
+import websiteIcon from '../assets/icons/Out_light.svg'
 import refreshIcon from '../assets/icons/Refresh_light.svg'
+import signOutIcon from '../assets/icons/Sign_out_squre_light.svg'
 import userIcon from '../assets/icons/User_duotone.svg'
 
 const adminLinks = [
@@ -48,7 +48,7 @@ function AdminControlPanel({ activeView, onViewChange, onLogOut }) {
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-[#28241f]! no-underline! transition-colors visited:text-[#28241f]! hover:bg-[#e8e8e8]/60"
         >
           <img
-            src={expandRightIcon}
+            src={websiteIcon}
             alt=""
             className="h-4 w-4"
             aria-hidden="true"
@@ -60,7 +60,7 @@ function AdminControlPanel({ activeView, onViewChange, onLogOut }) {
           onClick={onLogOut}
           className="flex! w-full items-center justify-start! gap-3 rounded-lg px-3 py-2.5 text-left! text-sm font-semibold text-[#28241f] transition-colors hover:bg-[#e8e8e8]/60"
         >
-          <img src={outIcon} alt="" className="h-4 w-4" aria-hidden="true" />
+          <img src={signOutIcon} alt="" className="h-4 w-4" aria-hidden="true" />
           <span>Log out</span>
         </button>
       </div>

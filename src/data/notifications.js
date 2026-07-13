@@ -32,3 +32,17 @@ export function getNotificationActionText(type) {
 
   return 'liked your article:'
 }
+
+export function getNotificationActionParts(type) {
+  if (type === 'comment') {
+    return {
+      firstLine: 'Commented on',
+      secondLine: 'your article.',
+    }
+  }
+
+  return {
+    firstLine: 'liked',
+    secondLine: 'your article.',
+  }
+}

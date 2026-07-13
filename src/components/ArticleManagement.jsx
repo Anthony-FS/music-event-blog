@@ -232,8 +232,8 @@ function ArticleManagementTable({
 
   return (
     <div className={listWindowClassName}>
-      <div className="sticky top-0 z-10 hidden grid-cols-[minmax(0,1fr)_140px_140px_96px] gap-4 border-b border-[#dedbd6] bg-white px-6 py-4 text-sm font-semibold text-[#75716b] md:grid">
-        <span>Article title</span>
+      <div className="sticky top-0 z-10 hidden grid-cols-[minmax(0,1fr)_140px_140px_96px] items-center gap-4 border-b border-[#dedbd6] bg-white px-6 py-4 text-sm font-semibold text-[#75716b] md:grid">
+        <span className="min-w-0">Article title</span>
         <span>Category</span>
         <span>Status</span>
         <span className="sr-only">Actions</span>
@@ -242,14 +242,14 @@ function ArticleManagementTable({
       {articles.map((article, index) => (
         <div
           key={article.id}
-          className={`grid gap-4 px-6 py-5 text-sm font-medium text-[#28241f] md:grid-cols-[minmax(0,1fr)_140px_140px_96px] md:items-center ${
+          className={`grid items-center gap-4 px-6 py-5 text-sm font-medium text-[#28241f] md:grid-cols-[minmax(0,1fr)_140px_140px_96px] ${
             index % 2 === 1 ? 'bg-[#f5f5f5]' : 'bg-white'
           }`}
         >
-          <p className="truncate">{article.title}</p>
-          <p>{article.category}</p>
+          <p className="m-0 min-w-0 truncate">{article.title}</p>
+          <p className="m-0">{article.category}</p>
           <p
-            className={`font-semibold ${
+            className={`m-0 font-semibold ${
               getArticleStatus(article) === 'draft'
                 ? 'text-[#75716b]'
                 : 'text-[#12b379]'
@@ -257,7 +257,7 @@ function ArticleManagementTable({
           >
             • {getArticleStatus(article) === 'draft' ? 'Draft' : 'Published'}
           </p>
-          <div className="flex items-center gap-4 md:justify-end">
+          <div className="flex items-center justify-end gap-4">
             <button
               type="button"
               aria-label={`Edit ${article.title}`}
