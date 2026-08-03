@@ -8,10 +8,18 @@ import useMember from '../hooks/useMember'
 
 function MemberManagementPage() {
   const location = useLocation()
-  const { member, saveMember } = useMember()
+  const { member, saveMember, isLoading } = useMember()
   const activeView = location.pathname.endsWith('/reset-password')
     ? 'reset-password'
     : 'profile'
+
+  if (isLoading || !member) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-sm font-semibold text-[#75716b]">Loading...</p>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -24,9 +32,9 @@ function MemberManagementPage() {
           activeView={activeView}
         />
         {activeView === 'reset-password' ? (
-          <ResetPasswordManagement />
+          <ResetPasswordManagement member={member} />
         ) : (
-          <ProfileManagement member={member ?? {}} onSave={saveMember} />
+          <ProfileManagement member={member} onSave={saveMember} />
         )}
       </section>
     </main>

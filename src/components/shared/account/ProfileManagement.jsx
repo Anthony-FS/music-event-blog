@@ -9,19 +9,18 @@ import {
 } from '../AdminPageShell'
 import { adminInputClassName, adminTextareaClassName } from '../../../lib/formStyles'
 import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
-import { updateStoredMember } from '../../../lib/memberSession'
+import { updateEmail } from '../../../services/profileService'
 
 const defaultAvatarUrl = '/images/myphoto.jpg'
-const defaultBio =
-  'I am a pet enthusiast and freelance writer who specializes in animal behavior and care.'
 
 function ProfileManagement({ member, onSave }) {
   const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl ?? defaultAvatarUrl)
+  const [isSaving, setIsSaving] = useState(false)
   const [formValues, setFormValues] = useState({
-    name: member.name ?? 'Thompson P.',
-    username: member.username ?? 'thompson',
-    email: member.email ?? 'thompson.p@gmail.com',
-    bio: member.bio ?? defaultBio,
+    name: member.name ?? '',
+    username: member.username ?? '',
+    email: member.email ?? '',
+    bio: member.bio ?? '',
   })
 
   function handleInputChange(event) {
@@ -55,19 +54,36 @@ function ProfileManagement({ member, onSave }) {
     event.target.value = ''
   }
 
-  function handleSave() {
-    const nextMember = {
-      ...member,
-      name: formValues.name.trim(),
-      username: formValues.username.trim(),
-      email: formValues.email.trim(),
-      bio: formValues.bio.trim(),
-      avatarUrl,
-    }
+  async function handleSave() {
+    try {
+      setIsSaving(true)
+      const requestedEmail = formValues.email.trim().toLowerCase()
+      let savedEmail = member.email
 
-    updateStoredMember(nextMember)
-    onSave?.(nextMember)
-    toast.success('Profile updated.')
+      if (requestedEmail !== member.email) {
+        const updatedUser = await updateEmail(requestedEmail)
+        savedEmail = updatedUser.email ?? member.email
+      }
+
+      await onSave?.({
+        ...member,
+        name: formValues.name.trim(),
+        username: formValues.username.trim(),
+        email: savedEmail,
+        bio: formValues.bio.trim(),
+        avatarUrl,
+      })
+
+      toast.success(
+        requestedEmail !== savedEmail
+          ? 'Profile updated. Check your inbox to confirm the new email.'
+          : 'Profile updated.',
+      )
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -79,9 +95,10 @@ function ProfileManagement({ member, onSave }) {
           <button
             type="button"
             onClick={handleSave}
+            disabled={isSaving}
             className={adminPrimaryButtonClassName}
           >
-            Save
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         }
       />

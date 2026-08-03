@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import NavBar from '../components/layout/NavBar'
 import FormTextInput from '../components/shared/FormTextInput'
-import { authenticateMember } from '../data/memberlogin'
-import { saveMemberSession } from '../lib/memberSession'
+import { signIn, signOut } from '../services/authService'
+import { getProfile } from '../services/profileService'
 import { validateLogInForm } from '../utils/validateLogInForm'
 
 const initialFormValues = {
@@ -13,10 +13,12 @@ const initialFormValues = {
 }
 
 function LogInPage() {
+  const location = useLocation()
   const navigate = useNavigate()
   const [formValues, setFormValues] = useState(initialFormValues)
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleInputChange(event) {
     const { name, value } = event.target
@@ -38,7 +40,7 @@ function LogInPage() {
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const nextErrors = validateLogInForm(formValues)
@@ -49,16 +51,25 @@ function LogInPage() {
       return
     }
 
-    const member = authenticateMember(formValues.email, formValues.password)
+    try {
+      setIsSubmitting(true)
+      const { user } = await signIn(formValues.email, formValues.password)
 
-    if (!member) {
-      setSubmitError('Invalid email or password.')
-      return
+      if (location.state?.requireAdmin) {
+        const profile = await getProfile(user.id)
+
+        if (profile?.role !== 'admin') {
+          await signOut()
+          throw new Error('This account does not have admin access.')
+        }
+      }
+
+      navigate(location.state?.from ?? '/', { replace: true })
+    } catch (error) {
+      setSubmitError(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    saveMemberSession(member)
-
-    navigate('/')
   }
 
   return (
@@ -102,9 +113,10 @@ function LogInPage() {
 
             <button
               type="submit"
+              disabled={isSubmitting}
               className="mt-3 self-center flex h-11 min-w-[124px] items-center justify-center rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-black"
             >
-              Log in
+              {isSubmitting ? 'Logging in...' : 'Log in'}
             </button>
 
             {submitError && (

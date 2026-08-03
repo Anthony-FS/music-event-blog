@@ -1,72 +1,40 @@
-import { members } from '../data/memberlogin'
+import { signOut } from '../services/authService'
 
 export const MEMBER_SESSION_UPDATED_EVENT = 'member-session-updated'
-
-export function getAuthToken() {
-  return localStorage.getItem('token')
-}
+const MEMBER_STORAGE_KEY = 'supabase-member'
 
 export function isLoggedIn() {
-  return Boolean(getAuthToken())
+  return Boolean(getStoredMember())
 }
 
 export function getStoredMember() {
-  if (!isLoggedIn()) {
-    return null
-  }
-
   try {
-    const member = JSON.parse(localStorage.getItem('member'))
+    const member = JSON.parse(localStorage.getItem(MEMBER_STORAGE_KEY))
     return member ?? null
   } catch {
     return null
   }
 }
 
-export function toMemberSessionPayload(member) {
-  return {
-    id: member.id,
-    name: member.name,
-    username: member.username,
-    email: member.email,
-    role: member.role ?? 'member',
-  }
-}
-
-export function saveMemberSession(member) {
-  const sessionMember = toMemberSessionPayload(member)
-
-  localStorage.setItem('token', String(sessionMember.id))
-  localStorage.setItem('member', JSON.stringify(sessionMember))
-  notifyMemberSessionUpdated()
-}
-
 export function updateStoredMember(member) {
-  localStorage.setItem('member', JSON.stringify(member))
+  localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify(member))
+  localStorage.removeItem('member')
+  localStorage.removeItem('token')
   notifyMemberSessionUpdated()
 }
 
-export function clearMemberSession() {
-  localStorage.removeItem('token')
+export function clearStoredMember() {
+  localStorage.removeItem(MEMBER_STORAGE_KEY)
   localStorage.removeItem('member')
+  localStorage.removeItem('token')
   notifyMemberSessionUpdated()
+}
+
+export async function clearMemberSession() {
+  await signOut()
+  clearStoredMember()
 }
 
 export function notifyMemberSessionUpdated() {
   window.dispatchEvent(new Event(MEMBER_SESSION_UPDATED_EVENT))
-}
-
-export function getCurrentMemberPassword() {
-  const storedMember = getStoredMember()
-
-  if (!storedMember) {
-    return 'password123'
-  }
-
-  const matchingMember = members.find(
-    (member) =>
-      member.id === storedMember.id || member.email === storedMember.email,
-  )
-
-  return matchingMember?.password ?? 'password123'
 }

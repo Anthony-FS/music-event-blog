@@ -62,7 +62,7 @@ function NavActions() {
 function MemberActions({ member, onLogOut }) {
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
-  const isAdmin = member?.role === 'admin' || member?.name === 'Admin'
+  const isAdmin = member?.role === 'admin'
 
   function handleNotificationMenuToggle() {
     setIsNotificationMenuOpen((currentValue) => !currentValue)
