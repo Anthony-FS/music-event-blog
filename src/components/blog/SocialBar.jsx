@@ -7,6 +7,7 @@ import linkedInIcon from '../../assets/icons/LinkedIN_black.svg'
 import twitterIcon from '../../assets/icons/Twitter_black.svg'
 import AuthRequiredDialog from '../shared/AuthRequiredDialog'
 import { isLoggedIn } from '../../lib/memberSession'
+import { likeArticle, unlikeArticle } from '../../services/articleService'
 
 const socialLinks = [
   { label: 'Facebook', icon: facebookIcon, bg: 'bg-[#1877f2]' },
@@ -26,8 +27,11 @@ function getShareUrl(platform) {
   return shareUrls[platform]
 }
 
-function SocialBar({ likes = 0 }) {
+function SocialBar({ articleId, likes = 0, likedByUser = false }) {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+  const [likeCount, setLikeCount] = useState(likes)
+  const [hasLiked, setHasLiked] = useState(likedByUser)
+  const [isUpdatingLike, setIsUpdatingLike] = useState(false)
 
   function requireAuth() {
     if (!isLoggedIn()) {
@@ -36,6 +40,26 @@ function SocialBar({ likes = 0 }) {
     }
 
     return true
+  }
+
+  async function handleLikeToggle() {
+    if (!requireAuth() || isUpdatingLike) {
+      return
+    }
+
+    try {
+      setIsUpdatingLike(true)
+      const result = hasLiked
+        ? await unlikeArticle(articleId)
+        : await likeArticle(articleId)
+      setLikeCount(result.likes)
+      setHasLiked(result.likedByUser)
+      toast.success(result.likedByUser ? 'Article liked.' : 'Like removed.')
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setIsUpdatingLike(false)
+    }
   }
 
   async function handleCopyLink() {
@@ -53,11 +77,18 @@ function SocialBar({ likes = 0 }) {
 
         <button
           type="button"
-          onClick={requireAuth}
-          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full! border border-[#28241f] bg-white px-5 text-sm font-semibold text-[#28241f] sm:h-10 sm:w-fit"
+          onClick={handleLikeToggle}
+          disabled={isUpdatingLike}
+          aria-pressed={hasLiked}
+          aria-label={hasLiked ? 'Unlike article' : 'Like article'}
+          className={`inline-flex h-9 w-full items-center justify-center gap-2 rounded-full! border border-[#28241f] px-5 text-sm font-semibold sm:h-10 sm:w-fit ${
+            hasLiked
+              ? 'bg-[#d9f8ec] text-[#0b8057] hover:bg-[#c7f3e3]'
+              : 'bg-white text-[#28241f] hover:bg-[#eeece8]'
+          }`}
         >
           <Smile size={18} strokeWidth={1.8} />
-          <span>{likes}</span>
+          <span>{likeCount}</span>
         </button>
 
         <div className="grid grid-cols-[minmax(0,1fr)_36px_36px_36px] items-center gap-2 sm:flex sm:flex-wrap sm:justify-start sm:gap-3">

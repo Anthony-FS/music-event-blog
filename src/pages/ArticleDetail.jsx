@@ -6,7 +6,7 @@ import CommentSection from '../components/blog/CommentSection'
 import Footer from '../components/layout/Footer'
 import NavBar from '../components/layout/NavBar'
 import SocialBar from '../components/blog/SocialBar'
-import api from '../lib/axios'
+import { getArticle } from '../services/articleService'
 import { formatArticleDate } from '../utils/formatArticleDate'
 import { normalizeArticleContent } from '../utils/normalizeArticleContent'
 
@@ -22,11 +22,9 @@ function ArticleDetail() {
         setIsLoading(true)
         setError(null)
 
-        const { data } = await api.get(`/posts/${id}`)
-        console.log('Article from server:', data)
-        setArticle(data.post ?? data)
-      } catch {
-        setError('Article could not be loaded.')
+        setArticle(await getArticle(id))
+      } catch (fetchError) {
+        setError(fetchError.message)
       } finally {
         setIsLoading(false)
       }
@@ -75,7 +73,11 @@ function ArticleDetail() {
 
                   <ArticleBody content={article.content} />
                   <AuthorCard author={article.author} className="mt-10 lg:hidden" />
-                  <SocialBar likes={article.likes} />
+                  <SocialBar
+                    articleId={article.id}
+                    likes={article.likes}
+                    likedByUser={article.likedByUser}
+                  />
                   <CommentSection />
 
                 </div>

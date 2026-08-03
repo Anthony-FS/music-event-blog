@@ -47,7 +47,7 @@ function MembersControlPanel({
         <img
           src={avatarUrl ?? '/images/myphoto.jpg'}
           alt=""
-          className="h-16 w-16 rounded-full object-cover"
+          className="aspect-square h-16 w-16 rounded-full! object-cover"
         />
         <p className="text-xl font-bold text-[#75716b]">
           {memberName ?? 'Anthony FS.'}
