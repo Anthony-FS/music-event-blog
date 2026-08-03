@@ -8,6 +8,7 @@ function BlogCard({
   date,
   image,
   authorName,
+  authorAvatar,
   authorBio,
 }) {
   return (
@@ -32,25 +33,34 @@ function BlogCard({
           <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#75716b]! no-underline!">
             {description}
           </p>
-          <BlogMeta date={date} authorName={authorName} authorBio={authorBio} />
+          <BlogMeta
+            date={date}
+            authorName={authorName}
+            authorAvatar={authorAvatar}
+            authorBio={authorBio}
+          />
         </div>
       </article>
     </Link>
   )
 }
 
-function BlogMeta({ date, authorName, authorBio }) {
+function BlogMeta({ date, authorName, authorAvatar, authorBio }) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#75716b]">
       <img
-        src="/images/myphoto.jpg"
-        alt=""
+        src={authorAvatar || '/images/myphoto.jpg'}
+        alt={authorName}
         className="h-5 w-5 rounded-full object-cover"
         loading="lazy"
       />
       <span className="font-semibold text-[#43403b]">{authorName}</span>
-      <span aria-hidden="true">|</span>
-      <span>{authorBio}</span>
+      {authorBio && (
+        <>
+          <span aria-hidden="true">|</span>
+          <span>{authorBio}</span>
+        </>
+      )}
       <span aria-hidden="true">|</span>
       <time dateTime="2024-09-11">{date}</time>
     </div>

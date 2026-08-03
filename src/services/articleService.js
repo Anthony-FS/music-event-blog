@@ -111,6 +111,7 @@ export async function unlikeArticle(articleId) {
 
 export function normalizeArticle(article) {
   const rawStatus = String(article?.status ?? 'published').toLowerCase()
+  const authorName = article.author ?? 'Admin'
 
   return {
     ...article,
@@ -120,7 +121,13 @@ export function normalizeArticle(article) {
     status: rawStatus === 'publish' ? 'published' : rawStatus,
     likes: Number(article.likes ?? article.likes_count ?? 0),
     likedByUser: Boolean(article.likedByUser),
-    author: article.author ?? 'Admin',
+    author: authorName,
+    authorProfile: {
+      id: article.authorId ?? article.author_id ?? null,
+      name: authorName,
+      avatarUrl: article.authorAvatar ?? article.author_avatar ?? '',
+      bio: article.authorBio ?? article.author_bio ?? '',
+    },
   }
 }
 

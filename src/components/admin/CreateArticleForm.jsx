@@ -31,10 +31,11 @@ import {
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
 } from '../../lib/adminPageStyles'
+import useMember from '../../hooks/useMember'
 
 const initialFormValues = {
   categoryId: '',
-  authorName: 'Thompson P.',
+  authorName: '',
   title: '',
   introduction: '',
   content: '',
@@ -42,6 +43,7 @@ const initialFormValues = {
 
 function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
   const isEditMode = articleId != null
+  const { member } = useMember()
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [originalThumbnailUrl, setOriginalThumbnailUrl] = useState('')
   const [pendingImageFile, setPendingImageFile] = useState(null)
@@ -70,7 +72,7 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
         setOriginalThumbnailUrl(article.image ?? '')
         setFormValues({
           categoryId: article.categoryId ? String(article.categoryId) : '',
-          authorName: article.author ?? 'Thompson P.',
+          authorName: article.author ?? '',
           title: article.title ?? '',
           introduction: article.description ?? '',
           content: article.content ?? '',
@@ -271,7 +273,7 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
         <div className="flex w-full max-w-3xl flex-col gap-8">
           <FormField label="Thumbnail image">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <div className="flex aspect-5/3 w-full max-w-[360px] items-center justify-center overflow-hidden rounded-sm border border-dashed border-[#dedbd6] bg-[#f6f5f2]">
+              <div className="flex aspect-5/3 w-full max-w-90 items-center justify-center overflow-hidden rounded-sm border border-dashed border-[#dedbd6] bg-[#f6f5f2]">
                 {thumbnailUrl ? (
                   <img
                     src={thumbnailUrl}
@@ -327,9 +329,13 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
           <FormField label="Author name">
             <input
               name="authorName"
-              value={formValues.authorName}
-              onChange={handleInputChange}
-              placeholder="Thompson P."
+              value={
+                isEditMode
+                  ? formValues.authorName
+                  : (member?.name ?? member?.username ?? '')
+              }
+              readOnly
+              placeholder="Current administrator"
               className={adminReadonlyInputClassName}
             />
           </FormField>
@@ -363,7 +369,7 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
               onChange={handleInputChange}
               rows={14}
               placeholder="Content"
-              className={`${adminTextareaClassName} min-h-[320px]`}
+              className={`${adminTextareaClassName} min-h-80`}
             />
           </FormField>
 

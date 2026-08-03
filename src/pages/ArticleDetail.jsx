@@ -72,17 +72,23 @@ function ArticleDetail() {
                   </p>
 
                   <ArticleBody content={article.content} />
-                  <AuthorCard author={article.author} className="mt-10 lg:hidden" />
+                  <AuthorCard
+                    author={article.authorProfile}
+                    className="mt-10 lg:hidden"
+                  />
                   <SocialBar
                     articleId={article.id}
                     likes={article.likes}
                     likedByUser={article.likedByUser}
                   />
-                  <CommentSection />
+                  <CommentSection articleId={article.id} />
 
                 </div>
 
-                <AuthorCard author={article.author} className="hidden lg:block" />
+                <AuthorCard
+                  author={article.authorProfile}
+                  className="hidden lg:block"
+                />
               </div>
             </article>
           )}

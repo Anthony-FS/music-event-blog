@@ -6,7 +6,6 @@ import ArticleToolbar from './ArticleToolbar'
 import BlogCard from './BlogCard'
 
 const POSTS_PER_PAGE = 6
-const AUTHOR_BIO = 'Music Enjoyer'
 
 function ArticleSection() {
   const [articles, setArticles] = useState([])
@@ -128,7 +127,8 @@ function ArticleSection() {
                 date={formatArticleDate(article.date)}
                 image={article.image}
                 authorName={article.author}
-                authorBio={AUTHOR_BIO}
+                authorAvatar={article.authorProfile.avatarUrl}
+
               />
             ))}
           </div>
