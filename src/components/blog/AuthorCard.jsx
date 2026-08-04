@@ -15,7 +15,7 @@ function AuthorCard({ author, className = '' }) {
         <img
           src={avatarUrl || DEFAULT_MEMBER_AVATAR_URL}
           alt={authorName}
-          className="h-12 w-12 rounded-full object-cover"
+          className="aspect-square size-12 shrink-0 rounded-full! object-cover"
           loading="lazy"
         />
         <div className="flex flex-col mt-2.5 gap-0">
