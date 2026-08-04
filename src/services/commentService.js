@@ -1,4 +1,5 @@
 import api from '../lib/axios'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../lib/avatar'
 
 export async function getComments(articleId) {
   try {
@@ -29,7 +30,7 @@ function normalizeComment(comment) {
     id: Number(comment.id),
     userId: comment.userId,
     name: comment.name ?? 'Member',
-    avatar: comment.avatar ?? '/images/myphoto.jpg',
+    avatar: comment.avatar || DEFAULT_MEMBER_AVATAR_URL,
     message: comment.message ?? '',
     createdAt: comment.createdAt,
   }

@@ -5,6 +5,7 @@ import fileIcon from '../../assets/icons/File_light.svg'
 import folderIcon from '../../assets/icons/Img_box_light.svg'
 import refreshIcon from '../../assets/icons/Refresh_light.svg'
 import userIcon from '../../assets/icons/User_duotone.svg'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../lib/avatar'
 
 const adminLinks = [
   {
@@ -45,7 +46,7 @@ function MembersControlPanel({
     <aside className="space-y-8">
       <div className="flex items-center gap-4">
         <img
-          src={avatarUrl ?? '/images/myphoto.jpg'}
+          src={avatarUrl || DEFAULT_MEMBER_AVATAR_URL}
           alt=""
           className="aspect-square h-16 w-16 rounded-full! object-cover"
         />

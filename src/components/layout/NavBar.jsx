@@ -10,6 +10,7 @@ import sandwichMenu from '../../assets/icons/Sandwich_menu.svg'
 import userIcon from '../../assets/icons/User_duotone.svg'
 import NotificationMenu from '../admin/NotificationMenu'
 import useMember from '../../hooks/useMember'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../lib/avatar'
 
 const authLinks = [
   {
@@ -97,7 +98,7 @@ function MemberActions({ member, onLogOut }) {
           onClick={handleMemberMenuToggle}
         >
           <img
-            src={member?.avatarUrl ?? '/images/myphoto.jpg'}
+            src={member?.avatarUrl || DEFAULT_MEMBER_AVATAR_URL}
             alt=""
             className="h-8 w-8 rounded-full object-cover"
           />

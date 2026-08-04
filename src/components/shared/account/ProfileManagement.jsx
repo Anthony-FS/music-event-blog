@@ -9,12 +9,13 @@ import {
 } from '../AdminPageShell'
 import { adminInputClassName, adminTextareaClassName } from '../../../lib/formStyles'
 import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../../lib/avatar'
 import { updateEmail } from '../../../services/profileService'
 
-const defaultAvatarUrl = '/images/myphoto.jpg'
-
 function ProfileManagement({ member, onSave }) {
-  const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl ?? defaultAvatarUrl)
+  const [avatarUrl, setAvatarUrl] = useState(
+    member.avatarUrl || DEFAULT_MEMBER_AVATAR_URL,
+  )
   const [isSaving, setIsSaving] = useState(false)
   const [formValues, setFormValues] = useState({
     name: member.name ?? '',

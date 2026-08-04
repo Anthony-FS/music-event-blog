@@ -1,8 +1,10 @@
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../lib/avatar'
+
 function AuthorCard({ author, className = '' }) {
   const authorName =
     typeof author === 'string' ? author : (author?.name ?? 'Admin')
   const avatarUrl =
-    typeof author === 'object' ? author?.avatarUrl : '/images/myphoto.jpg'
+    typeof author === 'object' ? author?.avatarUrl : DEFAULT_MEMBER_AVATAR_URL
   const bio = typeof author === 'object' ? author?.bio : ''
 
   return (
@@ -11,7 +13,7 @@ function AuthorCard({ author, className = '' }) {
     >
       <div className="flex items-center gap-3">
         <img
-          src={avatarUrl || '/images/myphoto.jpg'}
+          src={avatarUrl || DEFAULT_MEMBER_AVATAR_URL}
           alt={authorName}
           className="h-12 w-12 rounded-full object-cover"
           loading="lazy"

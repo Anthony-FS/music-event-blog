@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../lib/avatar'
+
 function BlogCard({
   id,
   title,
@@ -49,7 +51,7 @@ function BlogMeta({ date, authorName, authorAvatar, authorBio }) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#75716b]">
       <img
-        src={authorAvatar || '/images/myphoto.jpg'}
+        src={authorAvatar || DEFAULT_MEMBER_AVATAR_URL}
         alt={authorName}
         className="h-5 w-5 rounded-full object-cover"
         loading="lazy"
