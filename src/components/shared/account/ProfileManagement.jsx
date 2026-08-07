@@ -10,12 +10,18 @@ import {
 import { adminInputClassName, adminTextareaClassName } from '../../../lib/formStyles'
 import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
 import { DEFAULT_MEMBER_AVATAR_URL } from '../../../lib/avatar'
+import {
+  deleteAvatarImage,
+  uploadAvatarImage,
+  validateAvatarImage,
+} from '../../../services/avatarService'
 import { updateEmail } from '../../../services/profileService'
 
 function ProfileManagement({ member, onSave }) {
   const [avatarUrl, setAvatarUrl] = useState(
     member.avatarUrl || DEFAULT_MEMBER_AVATAR_URL,
   )
+  const [pendingAvatarFile, setPendingAvatarFile] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
   const [formValues, setFormValues] = useState({
     name: member.name ?? '',
@@ -40,31 +46,37 @@ function ProfileManagement({ member, onSave }) {
       return
     }
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file.')
+    try {
+      validateAvatarImage(file)
+    } catch (error) {
+      toast.error(error.message)
       return
     }
 
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      setAvatarUrl(String(reader.result))
-    }
-
-    reader.readAsDataURL(file)
+    setPendingAvatarFile(file)
+    setAvatarUrl(URL.createObjectURL(file))
     event.target.value = ''
   }
 
   async function handleSave() {
+    let uploadedAvatarUrl = null
+
     try {
       setIsSaving(true)
       const requestedEmail = formValues.email.trim().toLowerCase()
       let savedEmail = member.email
+      const previousAvatarUrl = member.avatarUrl || ''
 
       if (requestedEmail !== member.email) {
         const updatedUser = await updateEmail(requestedEmail)
         savedEmail = updatedUser.email ?? member.email
       }
+
+      uploadedAvatarUrl = pendingAvatarFile
+        ? await uploadAvatarImage(pendingAvatarFile)
+        : null
+
+      const nextAvatarUrl = uploadedAvatarUrl || avatarUrl
 
       await onSave?.({
         ...member,
@@ -72,8 +84,20 @@ function ProfileManagement({ member, onSave }) {
         username: formValues.username.trim(),
         email: savedEmail,
         bio: formValues.bio.trim(),
-        avatarUrl,
+        avatarUrl: nextAvatarUrl,
       })
+
+      if (
+        uploadedAvatarUrl &&
+        previousAvatarUrl &&
+        previousAvatarUrl !== uploadedAvatarUrl &&
+        !previousAvatarUrl.startsWith('data:')
+      ) {
+        await deleteAvatarImage(previousAvatarUrl).catch(() => {})
+      }
+
+      setPendingAvatarFile(null)
+      setAvatarUrl(nextAvatarUrl)
 
       toast.success(
         requestedEmail !== savedEmail
@@ -81,6 +105,9 @@ function ProfileManagement({ member, onSave }) {
           : 'Profile updated.',
       )
     } catch (error) {
+      if (uploadedAvatarUrl) {
+        await deleteAvatarImage(uploadedAvatarUrl).catch(() => {})
+      }
       toast.error(error.message)
     } finally {
       setIsSaving(false)
@@ -118,13 +145,13 @@ function ProfileManagement({ member, onSave }) {
               <img
                 src={avatarUrl}
                 alt=""
-                className="h-28 w-28 rounded-full object-cover"
+                className="aspect-square size-28 rounded-full! object-cover"
               />
               <label className="inline-flex! h-10 shrink-0 cursor-pointer items-center justify-center rounded-full! border border-[#28241f] bg-white px-6 text-sm font-semibold leading-none text-[#28241f] transition-colors hover:bg-[#eeece8]">
                 Upload profile picture
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   className="sr-only"
                   onChange={handleProfilePictureChange}
                 />

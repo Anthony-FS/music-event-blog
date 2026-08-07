@@ -28,7 +28,7 @@ const authLinks = [
 function NavLogo() {
   return (
     <Link to="/" aria-label="Home" className="inline-flex items-center">
-      <img src={logo} alt="hh." className="h-10 w-10 sm:h-12 sm:w-12" />
+      <img src={logo} alt="meb" className="h-12 w-16 sm:h-14 sm:w-20" />
     </Link>
   )
 }
