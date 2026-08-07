@@ -17,8 +17,9 @@ function CreateCategoryForm({
 }) {
   const isEditMode = initialCategoryName != null
   const [categoryName, setCategoryName] = useState(initialCategoryName ?? '')
+  const [isSaving, setIsSaving] = useState(false)
 
-  function handleSave() {
+  async function handleSave() {
     const trimmedName = categoryName.trim()
 
     if (!trimmedName) {
@@ -27,14 +28,17 @@ function CreateCategoryForm({
     }
 
     const isDuplicate = existingCategories.some((category) => {
+      const existingName =
+        typeof category === 'object' ? category.name : category
+
       if (
         isEditMode &&
-        category.toLowerCase() === initialCategoryName.toLowerCase()
+        existingName.toLowerCase() === initialCategoryName.toLowerCase()
       ) {
         return false
       }
 
-      return category.toLowerCase() === trimmedName.toLowerCase()
+      return existingName.toLowerCase() === trimmedName.toLowerCase()
     })
 
     if (isDuplicate) {
@@ -42,7 +46,14 @@ function CreateCategoryForm({
       return
     }
 
-    onSave(trimmedName)
+    try {
+      setIsSaving(true)
+      await onSave(trimmedName)
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -54,9 +65,10 @@ function CreateCategoryForm({
           <button
             type="button"
             onClick={handleSave}
+            disabled={isSaving}
             className={adminPrimaryButtonClassName}
           >
-            Save
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         }
       />

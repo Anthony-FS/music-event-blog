@@ -22,7 +22,7 @@ function AdminControlPanel({ activeView, onViewChange, onLogOut }) {
     <aside className="flex min-h-screen w-[300px] shrink-0 flex-col bg-[#f0f0f0]">
       <div className="px-6 py-8">
         <Link to="/" aria-label="Home" className="inline-flex items-center">
-          <img src={logo} alt="hh." className="h-10 w-10" />
+          <img src={logo} alt="meb" className="h-12 w-16" />
         </Link>
         <p className="mt-3 text-sm font-bold text-[#ffae88]">Admin panel</p>
       </div>
@@ -53,7 +53,7 @@ function AdminControlPanel({ activeView, onViewChange, onLogOut }) {
             className="h-4 w-4"
             aria-hidden="true"
           />
-          <span>hh. website</span>
+          <span>meb website</span>
         </Link>
         <button
           type="button"

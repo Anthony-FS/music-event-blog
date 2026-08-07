@@ -1,21 +1,76 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
   getNotificationActionText,
-  mockNotifications,
-} from '../../data/notifications'
+  getNotifications,
+  markNotificationsRead,
+} from '../../services/notificationService'
 import {
   AdminPageHeader,
   AdminPageShell,
 } from '../shared/AdminPageShell'
 
 function NotificationManagement() {
+  const [notifications, setNotifications] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadNotifications() {
+      try {
+        setIsLoading(true)
+        const result = await getNotifications()
+
+        if (isActive) {
+          setNotifications(result.notifications)
+          setError('')
+        }
+
+        if (result.unreadCount > 0) {
+          await markNotificationsRead()
+        }
+      } catch (loadError) {
+        if (isActive) {
+          setError(loadError.message)
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadNotifications()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
   return (
     <AdminPageShell variant="content">
       <AdminPageHeader title="Notification" />
 
       <div className="min-h-0 flex-1 divide-y divide-[#dedbd6] border-b border-[#dedbd6]">
-        {mockNotifications.map((notification) => (
+        {isLoading && (
+          <p className="px-6 py-8 text-sm font-semibold text-[#75716b] sm:px-10">
+            Loading notifications...
+          </p>
+        )}
+        {!isLoading && error && (
+          <p className="px-6 py-8 text-sm font-semibold text-red-600 sm:px-10">
+            {error}
+          </p>
+        )}
+        {!isLoading && !error && notifications.length === 0 && (
+          <p className="px-6 py-8 text-sm font-semibold text-[#75716b] sm:px-10">
+            No notifications yet.
+          </p>
+        )}
+        {notifications.map((notification) => (
           <NotificationItem key={notification.id} notification={notification} />
         ))}
       </div>

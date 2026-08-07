@@ -4,8 +4,13 @@ import { toast } from 'sonner'
 import addIcon from '../../assets/icons/Add_round_light.svg'
 import editIcon from '../../assets/icons/Edit_light.svg'
 import trashIcon from '../../assets/icons/Trash_light.svg'
-import api from '../../lib/axios'
 import { adminPrimaryButtonClassName } from '../../lib/adminPageStyles'
+import {
+  deleteArticle,
+  getArticles,
+} from '../../services/articleService'
+import { deleteArticleImage } from '../../services/articleImageService'
+import { getCategories } from '../../services/categoryService'
 import ArticleManagementToolbar from './ArticleManagementToolbar'
 import CreateArticleForm from './CreateArticleForm'
 import ConfirmDialog from '../shared/ConfirmDialog'
@@ -42,16 +47,7 @@ function ArticleManagement() {
 
     async function fetchCategories() {
       try {
-        const { data } = await api.get('/posts')
-        const serverCategories = Array.from(
-          new Set(
-            (data.posts ?? [])
-              .map((article) => article.category)
-              .filter(Boolean),
-          ),
-        )
-
-        setCategories(serverCategories)
+        setCategories(await getCategories())
       } catch {
         setCategories([])
       }
@@ -70,30 +66,17 @@ function ArticleManagement() {
         setIsLoading(true)
         setError(null)
 
-        const params = { page: 1, limit: POSTS_PER_PAGE }
-
-        if (searchValue.trim()) {
-          params.search = searchValue.trim()
-        }
-
-        if (selectedCategory) {
-          params.category = selectedCategory
-        }
-
-        const { data } = await api.get('/posts', { params })
-
-        let posts = data.posts ?? []
-
-        if (selectedStatus) {
-          const normalizedStatus = selectedStatus.toLowerCase()
-          posts = posts.filter(
-            (article) => getArticleStatus(article) === normalizedStatus,
-          )
-        }
+        const { posts } = await getArticles({
+          page: 1,
+          limit: POSTS_PER_PAGE,
+          search: searchValue,
+          categoryId: selectedCategory,
+          status: selectedStatus.toLowerCase(),
+        })
 
         setArticles(posts)
-      } catch {
-        setError('Failed to load articles. Please try again later.')
+      } catch (fetchError) {
+        setError(fetchError.message)
       } finally {
         setIsLoading(false)
       }
@@ -127,12 +110,21 @@ function ArticleManagement() {
     setDeletingArticleId(articleId)
   }
 
-  function handleConfirmDelete() {
-    setArticles((currentArticles) =>
-      currentArticles.filter((article) => article.id !== deletingArticleId),
-    )
-    setDeletingArticleId(null)
-    toast.success('Article deleted.')
+  async function handleConfirmDelete() {
+    try {
+      const articleToDelete = articles.find(
+        (article) => article.id === deletingArticleId,
+      )
+      await deleteArticle(deletingArticleId)
+      await deleteArticleImage(articleToDelete?.image).catch(() => {})
+      setArticles((currentArticles) =>
+        currentArticles.filter((article) => article.id !== deletingArticleId),
+      )
+      setDeletingArticleId(null)
+      toast.success('Article deleted.')
+    } catch (deleteError) {
+      toast.error(deleteError.message)
+    }
   }
 
   if (view === 'create') {

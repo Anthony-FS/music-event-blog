@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { author } from '../../data/blogPosts'
-import api from '../../lib/axios'
+import { getArticles } from '../../services/articleService'
+import { getCategories } from '../../services/categoryService'
 import { formatArticleDate } from '../../utils/formatArticleDate'
 import ArticleToolbar from './ArticleToolbar'
 import BlogCard from './BlogCard'
@@ -21,16 +21,8 @@ function ArticleSection() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const { data } = await api.get('/posts')
-        const serverCategories = Array.from(
-          new Set(
-            data.posts
-              .map((article) => article.category)
-              .filter(Boolean),
-          ),
-        )
-
-        setCategories(['All', ...serverCategories])
+        const serverCategories = await getCategories()
+        setCategories(['All', ...serverCategories.map((category) => category.name)])
       } catch {
         setCategories(['All'])
       }
@@ -46,16 +38,17 @@ function ArticleSection() {
         setError(null)
         setPage(1)
 
-        const { posts, hasMore } = await getPosts({
-          pageToFetch: 1,
-          selectedCategory,
-          searchValue,
+        const { posts, hasMore } = await getArticles({
+          page: 1,
+          limit: POSTS_PER_PAGE,
+          category: selectedCategory === 'All' ? undefined : selectedCategory,
+          search: searchValue,
         })
 
         setArticles(posts)
         setHasMoreArticles(hasMore)
-      } catch {
-        setError('Failed to load articles. Please try again later.')
+      } catch (fetchError) {
+        setError(fetchError.message)
       } finally {
         setIsLoading(false)
       }
@@ -82,17 +75,18 @@ function ArticleSection() {
     try {
       setIsLoadingMore(true)
 
-      const { posts, hasMore } = await getPosts({
-        pageToFetch: nextPage,
-        selectedCategory,
-        searchValue,
+      const { posts, hasMore } = await getArticles({
+        page: nextPage,
+        limit: POSTS_PER_PAGE,
+        category: selectedCategory === 'All' ? undefined : selectedCategory,
+        search: searchValue,
       })
 
       setArticles((currentArticles) => [...currentArticles, ...posts])
       setPage(nextPage)
       setHasMoreArticles(hasMore)
-    } catch {
-      setError('Failed to load more articles. Please try again later.')
+    } catch (fetchError) {
+      setError(fetchError.message)
     } finally {
       setIsLoadingMore(false)
     }
@@ -133,7 +127,8 @@ function ArticleSection() {
                 date={formatArticleDate(article.date)}
                 image={article.image}
                 authorName={article.author}
-                authorBio={author.bio}
+                authorAvatar={article.authorProfile.avatarUrl}
+
               />
             ))}
           </div>
@@ -158,30 +153,6 @@ function ArticleSection() {
       </div>
     </section>
   )
-}
-
-async function getPosts({ pageToFetch, selectedCategory, searchValue }) {
-  const params = {
-    page: pageToFetch,
-    limit: POSTS_PER_PAGE,
-  }
-
-  if (selectedCategory !== 'All') {
-    params.category = selectedCategory
-  }
-
-  if (searchValue.trim()) {
-    params.search = searchValue.trim()
-  }
-
-  const { data } = await api.get('/posts', { params })
-  const posts = data.posts ?? []
-  const hasMore =
-    typeof data.hasMore === 'boolean'
-      ? data.hasMore
-      : posts.length === POSTS_PER_PAGE
-
-  return { posts, hasMore }
 }
 
 export default ArticleSection

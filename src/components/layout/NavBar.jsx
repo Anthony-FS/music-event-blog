@@ -10,6 +10,7 @@ import sandwichMenu from '../../assets/icons/Sandwich_menu.svg'
 import userIcon from '../../assets/icons/User_duotone.svg'
 import NotificationMenu from '../admin/NotificationMenu'
 import useMember from '../../hooks/useMember'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../lib/avatar'
 
 const authLinks = [
   {
@@ -27,7 +28,7 @@ const authLinks = [
 function NavLogo() {
   return (
     <Link to="/" aria-label="Home" className="inline-flex items-center">
-      <img src={logo} alt="hh." className="h-10 w-10 sm:h-12 sm:w-12" />
+      <img src={logo} alt="meb" className="h-12 w-16 sm:h-14 sm:w-20" />
     </Link>
   )
 }
@@ -62,7 +63,7 @@ function NavActions() {
 function MemberActions({ member, onLogOut }) {
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
-  const isAdmin = member?.role === 'admin' || member?.name === 'Admin'
+  const isAdmin = member?.role === 'admin'
 
   function handleNotificationMenuToggle() {
     setIsNotificationMenuOpen((currentValue) => !currentValue)
@@ -97,7 +98,7 @@ function MemberActions({ member, onLogOut }) {
           onClick={handleMemberMenuToggle}
         >
           <img
-            src={member?.avatarUrl ?? '/images/myphoto.jpg'}
+            src={member?.avatarUrl || DEFAULT_MEMBER_AVATAR_URL}
             alt=""
             className="h-8 w-8 rounded-full object-cover"
           />

@@ -4,8 +4,17 @@ import { toast } from 'sonner'
 import expandDownIcon from '../../assets/icons/Expand_down_light.svg'
 import imgBoxIcon from '../../assets/icons/Img_box_light.svg'
 import trashIcon from '../../assets/icons/Trash_light.svg'
-import { categories as defaultCategories } from '../../data/blogPosts'
-import api from '../../lib/axios'
+import {
+  createArticle,
+  deleteArticle,
+  getArticle,
+  updateArticle,
+} from '../../services/articleService'
+import {
+  deleteArticleImage,
+  uploadArticleImage,
+  validateArticleImage,
+} from '../../services/articleImageService'
 import ConfirmDialog from '../shared/ConfirmDialog'
 import FormField from '../shared/FormField'
 import {
@@ -22,10 +31,11 @@ import {
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
 } from '../../lib/adminPageStyles'
+import useMember from '../../hooks/useMember'
 
 const initialFormValues = {
-  category: '',
-  authorName: 'Thompson P.',
+  categoryId: '',
+  authorName: '',
   title: '',
   introduction: '',
   content: '',
@@ -33,13 +43,18 @@ const initialFormValues = {
 
 function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
   const isEditMode = articleId != null
+  const { member } = useMember()
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [originalThumbnailUrl, setOriginalThumbnailUrl] = useState('')
+  const [pendingImageFile, setPendingImageFile] = useState(null)
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isLoadingArticle, setIsLoadingArticle] = useState(isEditMode)
   const [loadError, setLoadError] = useState(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const categoryOptions = buildCategoryOptions(categories, formValues.category)
+  const categoryOptions = buildCategoryOptions(categories)
 
   useEffect(() => {
     if (!isEditMode) {
@@ -51,19 +66,19 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
         setIsLoadingArticle(true)
         setLoadError(null)
 
-        const { data } = await api.get(`/posts/${articleId}`)
-        const article = data.post ?? data
+        const article = await getArticle(articleId)
 
         setThumbnailUrl(article.image ?? '')
+        setOriginalThumbnailUrl(article.image ?? '')
         setFormValues({
-          category: article.category ?? '',
-          authorName: article.author ?? 'Thompson P.',
+          categoryId: article.categoryId ? String(article.categoryId) : '',
+          authorName: article.author ?? '',
           title: article.title ?? '',
           introduction: article.description ?? '',
           content: article.content ?? '',
         })
-      } catch {
-        setLoadError('Failed to load article. Please try again later.')
+      } catch (error) {
+        setLoadError(error.message)
       } finally {
         setIsLoadingArticle(false)
       }
@@ -88,11 +103,14 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
       return
     }
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file.')
+    try {
+      validateArticleImage(file)
+    } catch (error) {
+      toast.error(error.message)
       return
     }
 
+    setPendingImageFile(file)
     const reader = new FileReader()
 
     reader.onload = () => {
@@ -103,27 +121,90 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
     event.target.value = ''
   }
 
-  function handleSave(status) {
+  async function handleSave(status) {
+    if (isSaving) {
+      return
+    }
+
     if (!formValues.title.trim()) {
       toast.error('Please enter an article title.')
       return
     }
 
-    if (!formValues.category) {
+    if (!formValues.categoryId) {
       toast.error('Please select a category.')
       return
     }
 
-    toast.success(
-      status === 'published' ? 'Article published.' : 'Article saved as draft.',
-    )
-    onClose()
+    if (!pendingImageFile && !thumbnailUrl) {
+      toast.error('Please upload a thumbnail image.')
+      return
+    }
+
+    let uploadedImageUrl = null
+
+    try {
+      setIsSaving(true)
+      uploadedImageUrl = pendingImageFile
+        ? await uploadArticleImage(pendingImageFile)
+        : null
+
+      const articlePayload = {
+        title: formValues.title.trim(),
+        image: uploadedImageUrl ?? thumbnailUrl,
+        categoryId: Number(formValues.categoryId),
+        description: formValues.introduction.trim(),
+        content: formValues.content.trim(),
+        status,
+      }
+
+      if (isEditMode) {
+        await updateArticle(articleId, articlePayload)
+      } else {
+        await createArticle(articlePayload)
+      }
+
+      if (
+        uploadedImageUrl &&
+        originalThumbnailUrl &&
+        originalThumbnailUrl !== uploadedImageUrl
+      ) {
+        await deleteArticleImage(originalThumbnailUrl).catch(() => {})
+      }
+
+      toast.success(
+        status === 'published'
+          ? 'Article published.'
+          : 'Article saved as draft.',
+      )
+      onClose()
+    } catch (error) {
+      if (uploadedImageUrl) {
+        await deleteArticleImage(uploadedImageUrl).catch(() => {})
+      }
+      toast.error(error.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  function handleConfirmDelete() {
-    setIsDeleteDialogOpen(false)
-    toast.success('Article deleted.')
-    onClose()
+  async function handleConfirmDelete() {
+    if (isDeleting) {
+      return
+    }
+
+    try {
+      setIsDeleting(true)
+      await deleteArticle(articleId)
+      await deleteArticleImage(originalThumbnailUrl).catch(() => {})
+      setIsDeleteDialogOpen(false)
+      toast.success('Article deleted.')
+      onClose()
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   if (isLoadingArticle) {
@@ -170,16 +251,18 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
             <button
               type="button"
               onClick={() => handleSave('draft')}
+              disabled={isSaving}
               className={adminSecondaryButtonClassName}
             >
-              Save as draft
+              {isSaving ? 'Saving...' : 'Save as draft'}
             </button>
             <button
               type="button"
               onClick={() => handleSave('published')}
+              disabled={isSaving}
               className={adminPrimaryButtonClassName}
             >
-              {isEditMode ? 'Save' : 'Save and publish'}
+              {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Save and publish'}
             </button>
           </div>
         }
@@ -190,7 +273,7 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
         <div className="flex w-full max-w-3xl flex-col gap-8">
           <FormField label="Thumbnail image">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <div className="flex aspect-5/3 w-full max-w-[360px] items-center justify-center overflow-hidden rounded-sm border border-dashed border-[#dedbd6] bg-[#f6f5f2]">
+              <div className="flex aspect-5/3 w-full max-w-90 items-center justify-center overflow-hidden rounded-sm border border-dashed border-[#dedbd6] bg-[#f6f5f2]">
                 {thumbnailUrl ? (
                   <img
                     src={thumbnailUrl}
@@ -222,15 +305,15 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
           <FormField label="Category">
             <div className="relative w-full max-w-sm">
               <select
-                name="category"
-                value={formValues.category}
+                name="categoryId"
+                value={formValues.categoryId}
                 onChange={handleInputChange}
                 className={`${adminInputWideClassName} appearance-none pr-10 max-w-sm`}
               >
                 <option value="">Select category</option>
                 {categoryOptions.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                  <option key={category.id} value={category.id}>
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -246,9 +329,13 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
           <FormField label="Author name">
             <input
               name="authorName"
-              value={formValues.authorName}
-              onChange={handleInputChange}
-              placeholder="Thompson P."
+              value={
+                isEditMode
+                  ? formValues.authorName
+                  : (member?.name ?? member?.username ?? '')
+              }
+              readOnly
+              placeholder="Current administrator"
               className={adminReadonlyInputClassName}
             />
           </FormField>
@@ -282,7 +369,7 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
               onChange={handleInputChange}
               rows={14}
               placeholder="Content"
-              className={`${adminTextareaClassName} min-h-[320px]`}
+              className={`${adminTextareaClassName} min-h-80`}
             />
           </FormField>
 
@@ -309,24 +396,17 @@ function CreateArticleForm({ onClose, articleId = null, categories = [] }) {
           onConfirm={handleConfirmDelete}
           title="Delete article"
           description="Do you want to delete this article?"
-          confirmLabel="Delete"
+          confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
         />
       )}
     </AdminPageShell>
   )
 }
 
-function buildCategoryOptions(categories, selectedCategory) {
-  const baseCategories =
-    categories.length > 0
-      ? categories
-      : defaultCategories.filter((category) => category !== 'All')
-
-  if (selectedCategory && !baseCategories.includes(selectedCategory)) {
-    return [...baseCategories, selectedCategory]
-  }
-
-  return baseCategories
+function buildCategoryOptions(categories) {
+  return categories.filter(
+    (category) => category?.id != null && category?.name?.trim(),
+  )
 }
 
 export default CreateArticleForm

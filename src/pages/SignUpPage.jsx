@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import NavBar from '../components/layout/NavBar'
 import FormTextInput from '../components/shared/FormTextInput'
 import SignUpSuccessCard from '../components/member/SignUpSuccessCard'
+import { signUp } from '../services/authService'
 import { validateSignUpForm } from '../utils/validateSignUpForm'
 
 const initialFormValues = {
@@ -18,6 +19,8 @@ function SignUpPage() {
   const [errors, setErrors] = useState({})
   const [isRegistrationSuccessful, setIsRegistrationSuccessful] =
     useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleInputChange(event) {
     const { name, value } = event.target
@@ -33,16 +36,31 @@ function SignUpPage() {
         [name]: '',
       }))
     }
+
+    if (submitError) {
+      setSubmitError('')
+    }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const nextErrors = validateSignUpForm(formValues)
     setErrors(nextErrors)
+    setSubmitError('')
 
-    if (Object.keys(nextErrors).length === 0) {
+    if (Object.keys(nextErrors).length > 0) {
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      await signUp(formValues)
       setIsRegistrationSuccessful(true)
+    } catch (error) {
+      setSubmitError(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -112,10 +130,17 @@ function SignUpPage() {
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="mt-3 self-center flex h-11 min-w-[124px] items-center justify-center rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-black"
               >
-                Sign up
+                {isSubmitting ? 'Signing up...' : 'Sign up'}
               </button>
+
+              {submitError && (
+                <p className="text-center text-xs font-semibold text-red-600">
+                  {submitError}
+                </p>
+              )}
             </div>
 
             <p className="mt-4 text-center text-sm font-medium text-[#75716b]">

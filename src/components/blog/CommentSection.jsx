@@ -1,34 +1,47 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import AuthRequiredDialog from '../shared/AuthRequiredDialog'
 import { isLoggedIn } from '../../lib/memberSession'
+import { createComment, getComments } from '../../services/commentService'
 
-const comments = [
-  {
-    name: 'Jacob Lash',
-    date: '12 September 2024 at 18:30',
-    avatar: '/images/myphoto.jpg',
-    message:
-      'I loved this article! It really explains why my cat is so independent yet loving. The purring section was super interesting.',
-  },
-  {
-    name: 'Ahri',
-    date: '12 September 2024 at 18:30',
-    avatar: '/images/myphoto.jpg',
-    message:
-      "Such a great read! I've always wondered why my cat slow blinks at me-now I know it's her way of showing trust!",
-  },
-  {
-    name: 'Mimi mama',
-    date: '12 September 2024 at 18:30',
-    avatar: '/images/myphoto.jpg',
-    message:
-      'This article perfectly captures why cats make such amazing pets. I had no idea their purring could help with healing. Fascinating stuff!',
-  },
-]
-
-function CommentSection() {
+function CommentSection({ articleId }) {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+  const [comments, setComments] = useState([])
+  const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadComments() {
+      try {
+        setIsLoading(true)
+        setError('')
+        const loadedComments = await getComments(articleId)
+
+        if (isActive) {
+          setComments(loadedComments)
+        }
+      } catch (loadError) {
+        if (isActive) {
+          setError(loadError.message)
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadComments()
+
+    return () => {
+      isActive = false
+    }
+  }, [articleId])
 
   function requireAuth(event) {
     if (!isLoggedIn()) {
@@ -40,32 +53,83 @@ function CommentSection() {
     return true
   }
 
+  async function handleSubmit(event) {
+    event.preventDefault()
+
+    if (!requireAuth()) {
+      return
+    }
+
+    const trimmedMessage = message.trim()
+
+    if (!trimmedMessage) {
+      setError('Comment is required.')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      setError('')
+      const comment = await createComment(articleId, trimmedMessage)
+      setComments((currentComments) => [comment, ...currentComments])
+      setMessage('')
+      toast.success('Comment added.')
+    } catch (submitError) {
+      setError(submitError.message)
+      toast.error(submitError.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <section className="mt-12 w-full">
-      <label className="block w-full">
-        <span className="text-sm font-semibold text-[#75716b]">Comment</span>
-        <textarea
-          rows={4}
-          placeholder="What are your thoughts?"
-          onFocus={requireAuth}
-          className="mt-2 block min-h-[112px] w-full resize-y rounded-lg border border-[#dedbd6] bg-white px-4 py-3 text-sm font-medium text-[#28241f] outline-none placeholder:text-[#75716b] focus:border-[#28241f]"
-        />
-      </label>
+      <form onSubmit={handleSubmit}>
+        <label className="block w-full">
+          <span className="text-sm font-semibold text-[#75716b]">Comment</span>
+          <textarea
+            rows={4}
+            maxLength={1000}
+            value={message}
+            placeholder="What are your thoughts?"
+            onFocus={requireAuth}
+            onChange={(event) => {
+              setMessage(event.target.value)
+              setError('')
+            }}
+            className="mt-2 block min-h-28 w-full resize-y rounded-lg border border-[#dedbd6] bg-white px-4 py-3 text-sm font-medium text-[#28241f] outline-none placeholder:text-[#75716b] focus:border-[#28241f]"
+          />
+        </label>
 
-      <div className="mt-3 flex justify-end">
-        <button
-          type="button"
-          onClick={requireAuth}
-          className="h-10 rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#3a342e]"
-        >
-          Send
-        </button>
-      </div>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+
+        <div className="mt-3 flex justify-end">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-10 rounded-full! bg-[#28241f] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#3a342e] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+      </form>
 
       <div className="mt-10 space-y-8">
+        {isLoading && (
+          <p className="text-sm font-medium text-[#75716b]">
+            Loading comments...
+          </p>
+        )}
+
+        {!isLoading && comments.length === 0 && !error && (
+          <p className="text-sm font-medium text-[#75716b]">
+            No comments yet. Be the first to comment.
+          </p>
+        )}
+
         {comments.map((comment, index) => (
           <article
-            key={comment.name}
+            key={comment.id}
             className={index > 0 ? 'border-t border-[#dedbd6] pt-8' : ''}
           >
             <div className="flex items-center gap-3">
@@ -80,7 +144,7 @@ function CommentSection() {
                   {comment.name}
                 </h3>
                 <p className="text-xs font-medium text-[#75716b]">
-                  {comment.date}
+                  {formatCommentDate(comment.createdAt)}
                 </p>
               </div>
             </div>
@@ -98,6 +162,19 @@ function CommentSection() {
       />
     </section>
   )
+}
+
+function formatCommentDate(value) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  }).format(date)
 }
 
 export default CommentSection

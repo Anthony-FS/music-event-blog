@@ -1,10 +1,8 @@
-export function resetPasswordValidation(values, currentPassword) {
+export function resetPasswordValidation(values) {
   const nextErrors = {}
 
   if (!values.currentPassword.trim()) {
     nextErrors.currentPassword = 'Current password is required.'
-  } else if (values.currentPassword !== currentPassword) {
-    nextErrors.currentPassword = 'Current password is incorrect.'
   }
 
   if (!values.newPassword.trim()) {

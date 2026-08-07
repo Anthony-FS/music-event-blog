@@ -8,8 +8,11 @@ import {
   AdminPageHeader,
   AdminPageShell,
 } from '../AdminPageShell'
-import { getCurrentMemberPassword } from '../../../lib/memberSession'
 import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
+import {
+  updatePassword,
+  verifyCurrentPassword,
+} from '../../../services/authService'
 import { resetPasswordValidation } from '../../../utils/validatePasswordReset'
 
 const initialFormValues = {
@@ -18,10 +21,11 @@ const initialFormValues = {
   confirmPassword: '',
 }
 
-function ResetPasswordManagement() {
+function ResetPasswordManagement({ member }) {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [errors, setErrors] = useState({})
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleInputChange(event) {
     const { name, value } = event.target
@@ -42,10 +46,7 @@ function ResetPasswordManagement() {
   function handleSubmit(event) {
     event.preventDefault()
 
-    const nextErrors = resetPasswordValidation(
-      formValues,
-      getCurrentMemberPassword(),
-    )
+    const nextErrors = resetPasswordValidation(formValues)
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length > 0) {
@@ -55,10 +56,28 @@ function ResetPasswordManagement() {
     setIsConfirmDialogOpen(true)
   }
 
-  function handleConfirmReset() {
-    setFormValues(initialFormValues)
-    setIsConfirmDialogOpen(false)
-    toast.success('Password updated.')
+  async function handleConfirmReset() {
+    if (isSubmitting) {
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      await verifyCurrentPassword(member.email, formValues.currentPassword)
+      await updatePassword(formValues.newPassword)
+      setFormValues(initialFormValues)
+      setIsConfirmDialogOpen(false)
+      toast.success('Password updated.')
+    } catch (error) {
+      setIsConfirmDialogOpen(false)
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        currentPassword: error.message,
+      }))
+      toast.error(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -120,7 +139,7 @@ function ResetPasswordManagement() {
         onConfirm={handleConfirmReset}
         title="Reset password?"
         description="Are you sure you want to update your password?"
-        confirmLabel="Confirm reset"
+        confirmLabel={isSubmitting ? 'Updating...' : 'Confirm reset'}
         showCloseButton={false}
       />
     </AdminPageShell>

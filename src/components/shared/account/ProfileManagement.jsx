@@ -9,19 +9,25 @@ import {
 } from '../AdminPageShell'
 import { adminInputClassName, adminTextareaClassName } from '../../../lib/formStyles'
 import { adminPrimaryButtonClassName } from '../../../lib/adminPageStyles'
-import { updateStoredMember } from '../../../lib/memberSession'
-
-const defaultAvatarUrl = '/images/myphoto.jpg'
-const defaultBio =
-  'I am a pet enthusiast and freelance writer who specializes in animal behavior and care.'
+import { DEFAULT_MEMBER_AVATAR_URL } from '../../../lib/avatar'
+import {
+  deleteAvatarImage,
+  uploadAvatarImage,
+  validateAvatarImage,
+} from '../../../services/avatarService'
+import { updateEmail } from '../../../services/profileService'
 
 function ProfileManagement({ member, onSave }) {
-  const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl ?? defaultAvatarUrl)
+  const [avatarUrl, setAvatarUrl] = useState(
+    member.avatarUrl || DEFAULT_MEMBER_AVATAR_URL,
+  )
+  const [pendingAvatarFile, setPendingAvatarFile] = useState(null)
+  const [isSaving, setIsSaving] = useState(false)
   const [formValues, setFormValues] = useState({
-    name: member.name ?? 'Thompson P.',
-    username: member.username ?? 'thompson',
-    email: member.email ?? 'thompson.p@gmail.com',
-    bio: member.bio ?? defaultBio,
+    name: member.name ?? '',
+    username: member.username ?? '',
+    email: member.email ?? '',
+    bio: member.bio ?? '',
   })
 
   function handleInputChange(event) {
@@ -40,34 +46,72 @@ function ProfileManagement({ member, onSave }) {
       return
     }
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file.')
+    try {
+      validateAvatarImage(file)
+    } catch (error) {
+      toast.error(error.message)
       return
     }
 
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      setAvatarUrl(String(reader.result))
-    }
-
-    reader.readAsDataURL(file)
+    setPendingAvatarFile(file)
+    setAvatarUrl(URL.createObjectURL(file))
     event.target.value = ''
   }
 
-  function handleSave() {
-    const nextMember = {
-      ...member,
-      name: formValues.name.trim(),
-      username: formValues.username.trim(),
-      email: formValues.email.trim(),
-      bio: formValues.bio.trim(),
-      avatarUrl,
-    }
+  async function handleSave() {
+    let uploadedAvatarUrl = null
 
-    updateStoredMember(nextMember)
-    onSave?.(nextMember)
-    toast.success('Profile updated.')
+    try {
+      setIsSaving(true)
+      const requestedEmail = formValues.email.trim().toLowerCase()
+      let savedEmail = member.email
+      const previousAvatarUrl = member.avatarUrl || ''
+
+      if (requestedEmail !== member.email) {
+        const updatedUser = await updateEmail(requestedEmail)
+        savedEmail = updatedUser.email ?? member.email
+      }
+
+      uploadedAvatarUrl = pendingAvatarFile
+        ? await uploadAvatarImage(pendingAvatarFile)
+        : null
+
+      const nextAvatarUrl = uploadedAvatarUrl || avatarUrl
+
+      await onSave?.({
+        ...member,
+        name: formValues.name.trim(),
+        username: formValues.username.trim(),
+        email: savedEmail,
+        bio: formValues.bio.trim(),
+        avatarUrl: nextAvatarUrl,
+      })
+
+      if (
+        uploadedAvatarUrl &&
+        previousAvatarUrl &&
+        previousAvatarUrl !== uploadedAvatarUrl &&
+        !previousAvatarUrl.startsWith('data:')
+      ) {
+        await deleteAvatarImage(previousAvatarUrl).catch(() => {})
+      }
+
+      setPendingAvatarFile(null)
+      setAvatarUrl(nextAvatarUrl)
+
+      toast.success(
+        requestedEmail !== savedEmail
+          ? 'Profile updated. Check your inbox to confirm the new email.'
+          : 'Profile updated.',
+      )
+    } catch (error) {
+      if (uploadedAvatarUrl) {
+        await deleteAvatarImage(uploadedAvatarUrl).catch(() => {})
+      }
+      toast.error(error.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -79,9 +123,10 @@ function ProfileManagement({ member, onSave }) {
           <button
             type="button"
             onClick={handleSave}
+            disabled={isSaving}
             className={adminPrimaryButtonClassName}
           >
-            Save
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         }
       />
@@ -100,13 +145,13 @@ function ProfileManagement({ member, onSave }) {
               <img
                 src={avatarUrl}
                 alt=""
-                className="h-28 w-28 rounded-full object-cover"
+                className="aspect-square size-28 rounded-full! object-cover"
               />
               <label className="inline-flex! h-10 shrink-0 cursor-pointer items-center justify-center rounded-full! border border-[#28241f] bg-white px-6 text-sm font-semibold leading-none text-[#28241f] transition-colors hover:bg-[#eeece8]">
                 Upload profile picture
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   className="sr-only"
                   onChange={handleProfilePictureChange}
                 />
