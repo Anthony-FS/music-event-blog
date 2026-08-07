@@ -1,0 +1,263 @@
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
+import addIcon from '../../assets/icons/Add_round_light.svg'
+import editIcon from '../../assets/icons/Edit_light.svg'
+import trashIcon from '../../assets/icons/Trash_light.svg'
+import { adminPrimaryButtonClassName } from '../../lib/adminPageStyles'
+import {
+  deleteArticle,
+  getArticles,
+} from '../../services/articleService'
+import { deleteArticleImage } from '../../services/articleImageService'
+import { getCategories } from '../../services/categoryService'
+import ArticleManagementToolbar from './ArticleManagementToolbar'
+import CreateArticleForm from './CreateArticleForm'
+import ConfirmDialog from '../shared/ConfirmDialog'
+import {
+  AdminListPanel,
+  AdminPageContent,
+  AdminPageHeader,
+  AdminPageShell,
+} from '../shared/AdminPageShell'
+
+const POSTS_PER_PAGE = 30
+const STATUS_OPTIONS = ['Published', 'Draft']
+
+function getArticleStatus(article) {
+  return String(article.status ?? 'published').toLowerCase()
+}
+
+function ArticleManagement() {
+  const [view, setView] = useState('list')
+  const [editingArticleId, setEditingArticleId] = useState(null)
+  const [articles, setArticles] = useState([])
+  const [categories, setCategories] = useState([])
+  const [searchValue, setSearchValue] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [deletingArticleId, setDeletingArticleId] = useState(null)
+
+  useEffect(() => {
+    if (view !== 'list') {
+      return
+    }
+
+    async function fetchCategories() {
+      try {
+        setCategories(await getCategories())
+      } catch {
+        setCategories([])
+      }
+    }
+
+    fetchCategories()
+  }, [view])
+
+  useEffect(() => {
+    if (view !== 'list') {
+      return
+    }
+
+    async function fetchArticles() {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const { posts } = await getArticles({
+          page: 1,
+          limit: POSTS_PER_PAGE,
+          search: searchValue,
+          categoryId: selectedCategory,
+          status: selectedStatus.toLowerCase(),
+        })
+
+        setArticles(posts)
+      } catch (fetchError) {
+        setError(fetchError.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchArticles()
+  }, [view, searchValue, selectedStatus, selectedCategory])
+
+  const normalizedSearchValue = searchValue.trim().toLowerCase()
+  const searchResults = normalizedSearchValue
+    ? articles.filter((article) =>
+        [article.title, article.description, article.content]
+          .filter(Boolean)
+          .some((value) =>
+            String(value).toLowerCase().includes(normalizedSearchValue),
+          ),
+      )
+    : []
+
+  function handleCloseForm() {
+    setView('list')
+    setEditingArticleId(null)
+  }
+
+  function handleEditArticle(articleId) {
+    setEditingArticleId(articleId)
+    setView('edit')
+  }
+
+  function handleDeleteArticle(articleId) {
+    setDeletingArticleId(articleId)
+  }
+
+  async function handleConfirmDelete() {
+    try {
+      const articleToDelete = articles.find(
+        (article) => article.id === deletingArticleId,
+      )
+      await deleteArticle(deletingArticleId)
+      await deleteArticleImage(articleToDelete?.image).catch(() => {})
+      setArticles((currentArticles) =>
+        currentArticles.filter((article) => article.id !== deletingArticleId),
+      )
+      setDeletingArticleId(null)
+      toast.success('Article deleted.')
+    } catch (deleteError) {
+      toast.error(deleteError.message)
+    }
+  }
+
+  if (view === 'create') {
+    return (
+      <CreateArticleForm categories={categories} onClose={handleCloseForm} />
+    )
+  }
+
+  if (view === 'edit') {
+    return (
+      <CreateArticleForm
+        articleId={editingArticleId}
+        categories={categories}
+        onClose={handleCloseForm}
+      />
+    )
+  }
+
+  return (
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Article management"
+        actions={
+          <button
+            type="button"
+            onClick={() => setView('create')}
+            className={`${adminPrimaryButtonClassName} gap-2`}
+          >
+            <img src={addIcon} alt="" className="h-4 w-4 invert" aria-hidden="true" />
+            Create article
+          </button>
+        }
+      />
+
+      <AdminPageContent>
+        <ArticleManagementToolbar
+          categories={categories}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          searchResults={searchResults}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          statusOptions={STATUS_OPTIONS}
+        />
+        <div className="mt-6 flex min-h-0 flex-1 flex-col">
+          <ArticleManagementTable
+            articles={articles}
+            isLoading={isLoading}
+            error={error}
+            onEditArticle={handleEditArticle}
+            onDeleteArticle={handleDeleteArticle}
+          />
+        </div>
+      </AdminPageContent>
+
+      <ConfirmDialog
+        open={deletingArticleId != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingArticleId(null)
+          }
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete article"
+        description="Do you want to delete this article?"
+        confirmLabel="Delete"
+      />
+    </AdminPageShell>
+  )
+}
+
+function ArticleManagementTable({
+  articles,
+  isLoading,
+  error,
+  onEditArticle,
+  onDeleteArticle,
+}) {
+  return (
+    <AdminListPanel
+      isLoading={isLoading}
+      error={error}
+      isEmpty={articles.length === 0}
+      loadingMessage="Loading articles..."
+      emptyMessage="No articles found."
+    >
+      <div className="sticky top-0 z-10 hidden grid-cols-[minmax(0,1fr)_140px_140px_96px] items-center gap-4 border-b border-[#dedbd6] bg-white px-6 py-4 text-sm font-semibold text-[#75716b] md:grid">
+        <span className="min-w-0">Article title</span>
+        <span>Category</span>
+        <span>Status</span>
+        <span className="sr-only">Actions</span>
+      </div>
+
+      {articles.map((article, index) => (
+        <div
+          key={article.id}
+          className={`grid items-center gap-4 px-6 py-5 text-sm font-medium text-[#28241f] md:grid-cols-[minmax(0,1fr)_140px_140px_96px] ${
+            index % 2 === 1 ? 'bg-[#f5f5f5]' : 'bg-white'
+          }`}
+        >
+          <p className="m-0 min-w-0 truncate">{article.title}</p>
+          <p className="m-0">{article.category}</p>
+          <p
+            className={`m-0 font-semibold ${
+              getArticleStatus(article) === 'draft'
+                ? 'text-[#75716b]'
+                : 'text-[#12b379]'
+            }`}
+          >
+            • {getArticleStatus(article) === 'draft' ? 'Draft' : 'Published'}
+          </p>
+          <div className="flex items-center justify-end gap-4">
+            <button
+              type="button"
+              aria-label={`Edit ${article.title}`}
+              onClick={() => onEditArticle(article.id)}
+            >
+              <img src={editIcon} alt="" className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Delete ${article.title}`}
+              onClick={() => onDeleteArticle(article.id)}
+            >
+              <img src={trashIcon} alt="" className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      ))}
+    </AdminListPanel>
+  )
+}
+
+export default ArticleManagement
