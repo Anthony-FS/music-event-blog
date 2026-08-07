@@ -2,10 +2,18 @@ import axios from 'axios'
 
 import { supabase } from './supabase'
 
+const apiBaseUrl = String(
+  import.meta.env.VITE_API_BASE_URL ?? '',
+).replace(/\/$/, '')
+
+if (!apiBaseUrl) {
+  console.warn(
+    'VITE_API_BASE_URL is not set. API requests will fail until it is configured.',
+  )
+}
+
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE_URL ??
-    'https://blog-post-project-api.vercel.app',
+  baseURL: apiBaseUrl || undefined,
 })
 
 api.interceptors.request.use(async (config) => {
