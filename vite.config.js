@@ -13,4 +13,8 @@ export default defineConfig({
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    test: {
+      environment: 'jsdom',
+      include: ['tests/unit/**/*.test.{js,jsx}'],
+    },
 })
