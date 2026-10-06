@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { normalizeArticle } from './articleService'
+import { normalizeArticle } from '@/services/articleService'
 
 describe('normalizeArticle', () => {
   it('coerces ids to numbers and reads snake_case fallbacks', () => {

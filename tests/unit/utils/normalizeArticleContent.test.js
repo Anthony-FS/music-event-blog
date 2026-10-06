@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   normalizeArticleContent,
   normalizeParagraphs,
-} from './normalizeArticleContent'
+} from '@/utils/normalizeArticleContent'
 
 describe('normalizeArticleContent', () => {
   it('splits markdown headings into sections', () => {

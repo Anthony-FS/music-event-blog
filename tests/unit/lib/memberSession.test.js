@@ -6,7 +6,7 @@ import {
   isLoggedIn,
   MEMBER_SESSION_UPDATED_EVENT,
   updateStoredMember,
-} from './memberSession'
+} from '@/lib/memberSession'
 
 const STORAGE_KEY = 'supabase-member'
 const member = { id: 'uuid-1', name: 'Ada', role: 'admin' }

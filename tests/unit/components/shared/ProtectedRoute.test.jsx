@@ -2,10 +2,10 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import ProtectedRoute from './ProtectedRoute'
-import useMember from '../../hooks/useMember'
+import ProtectedRoute from '@/components/shared/ProtectedRoute'
+import useMember from '@/hooks/useMember'
 
-vi.mock('../../hooks/useMember', () => ({ default: vi.fn() }))
+vi.mock('@/hooks/useMember', () => ({ default: vi.fn() }))
 
 afterEach(cleanup)
 

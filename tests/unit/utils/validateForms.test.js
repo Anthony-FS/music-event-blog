@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { validateLogInForm } from './validateLogInForm'
-import { validateSignUpForm } from './validateSignUpForm'
+import { validateLogInForm } from '@/utils/validateLogInForm'
+import { validateSignUpForm } from '@/utils/validateSignUpForm'
 
 const validSignUp = {
   name: 'Ada',

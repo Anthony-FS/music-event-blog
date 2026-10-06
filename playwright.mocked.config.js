@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test'
 // push, and it covers the authenticated and write flows that the live smoke
 // suite must not touch.
 export default defineConfig({
-  testDir: './e2e/mocked',
+  testDir: './tests/e2e/mocked',
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {

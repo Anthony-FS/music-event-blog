@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { validateArticleImage } from './articleImageService'
+import { validateArticleImage } from '@/services/articleImageService'
 
 function fileOfSize(bytes, type = 'image/jpeg') {
   const file = new File(['x'], 'thumbnail.jpg', { type })

@@ -1,23 +1,23 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import useMember from './useMember'
-import { getSession, onAuthStateChange } from '../services/authService'
-import { getProfile, updateProfile } from '../services/profileService'
+import useMember from '@/hooks/useMember'
+import { getSession, onAuthStateChange } from '@/services/authService'
+import { getProfile, updateProfile } from '@/services/profileService'
 
-vi.mock('../lib/supabase', () => ({
+vi.mock('@/lib/supabase', () => ({
   supabase: { auth: {} },
   isSupabaseConfigured: () => true,
 }))
 
-vi.mock('../services/authService', () => ({
+vi.mock('@/services/authService', () => ({
   getSession: vi.fn(),
   onAuthStateChange: vi.fn(),
   signOut: vi.fn().mockResolvedValue(undefined),
 }))
 
 // mapProfileToMember stays real: the mapping is what we want to exercise.
-vi.mock('../services/profileService', async (importOriginal) => ({
+vi.mock('@/services/profileService', async (importOriginal) => ({
   ...(await importOriginal()),
   getProfile: vi.fn(),
   updateProfile: vi.fn(),

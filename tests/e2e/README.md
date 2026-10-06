@@ -2,7 +2,7 @@
 
 Two suites, split by what they are allowed to touch.
 
-## Live smoke — `smoke.spec.js`
+## Live smoke — `live/smoke.spec.js`
 
 Runs against the deployed site and is **read-only**: it signs nothing in and
 writes nothing. Point it elsewhere with `E2E_BASE_URL`.
