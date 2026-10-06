@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:e2e": "vite build --mode e2e",
+    "test:e2e:mocked": "playwright test --config playwright.mocked.config.js"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

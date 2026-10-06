@@ -23,7 +23,28 @@ jobs:
       - run: npm run lint
       - run: npm test
 
-  e2e:
+  # Hermetic: a local build with every request stubbed, so it is safe per push.
+  e2e-mocked:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:mocked
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-mocked
+          path: playwright-report/
+          retention-days: 7
+
+  # Hits the deployed site, so nightly and manual only.
+  e2e-live:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +59,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-live
           path: playwright-report/
           retention-days: 7
